@@ -3,10 +3,8 @@ const exec = require('child_process').exec;
 const fs = require('fs');
 const path = require('path');
 
-
-// cwd is used here since we assumed this command will be executed
-// in the package root. Otherwise it ain't going to work
-const ROOT = process.cwd();
+const workingPath = require.main.filename.split("/node_modules")[0];
+const ROOT = workingPath;
 const LEAD_DIR = ROOT + "/target/riffraff";
 
 
