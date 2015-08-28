@@ -154,4 +154,4 @@ function buildManifest() {
 // run the processes
 clean().then(createDirectories).then(cloudformation).then(deployJson).then(createTar).then(createZip);
 
-//# sourceMappingURL=main.js.map
+//# sourceMappingURL=riffraff-artefact.js.map

@@ -1,14 +1,14 @@
 {
   "name": "node-riffraff-artefact",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Deploy RiffRaff Artefacts",
-  "main": "bin/main.js",
+  "main": "bin/main",
   "bin": {
-      "riffraff-artefact" : "./bin/main.js"
+      "riffraff-artefact" : "./bin/main"
   },
   "scripts": {
-    "start": "node ./bin/main.js",
-    "build": "babel src/riffraff-artefact.js --out-file bin/main.js --source-maps"
+    "start": "node ./bin/main",
+    "build": "babel src/riffraff-artefact.js --out-file bin/riffraff-artefact.js --source-maps"
   },
   "homepage": "https://github.com/guardian/node-riffraff-artefact",
   "author": "Hugo Gibson",
