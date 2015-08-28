@@ -1,6 +1,7 @@
 logs
 *.log
 npm-debug.log*
+*.tern-port
 pids
 *.pid
 *.seed
