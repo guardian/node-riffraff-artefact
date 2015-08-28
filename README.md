@@ -2,7 +2,7 @@
 
 Plugin for building deployable RiffRaff artefacts in Node.
 
-**This is currently in Beta and does not work correctly. Speak to @hmgibson if you literally can't wait more than 5 minutes to use it.**
+**This is currently in Beta and does not work correctly. Speak to @hmgibson23 if you literally can't wait more than 5 minutes to use it.**
 
 ## Getting Started
 This is a node plugin for creating
