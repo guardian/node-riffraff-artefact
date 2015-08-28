@@ -144,7 +144,7 @@ function createDirectories() {
 }
 
 function cloudformation() {
-    return copyFile(packageJson.cloudformation,
+    return copyFile(ROOT + "/" + packageJson.cloudformation,
                     LEAD_DIR + '/packages/cloudformation/');
 }
 

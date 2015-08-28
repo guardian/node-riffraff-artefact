@@ -6,6 +6,8 @@ var exec = require('child_process').exec;
 var fs = require('fs');
 var path = require('path');
 
+// cwd is used here since we assumed this command will be executed
+// in the package root. Otherwise it ain't going to work
 var ROOT = process.cwd();
 var LEAD_DIR = ROOT + "/target/riffraff";
 
@@ -86,7 +88,8 @@ function s3Upload(file) {
 
 function createTar() {
     return new Promise(function (resolve, reject) {
-        var target = PACKAGEJSON_DIR + '/' + packageJson.app + '.tgz';
+        var target = PACKAGE_DIR + '/' + packageJson.app + '.tgz';
+        var buildDir = packageJson.buildDir || ROOT + "/*";
         console.log("Creating tgz in " + target);
 
         var result = function result(error) {
@@ -98,7 +101,7 @@ function createTar() {
             return resolve();
         };
 
-        var commandString = ["tar czf", target, "./*"].join(" ");
+        var commandString = ["tar czf", target, buildDir].join(" ");
         exec(commandString, result);
     });
 }
@@ -136,7 +139,7 @@ function createDirectories() {
 }
 
 function cloudformation() {
-    return copyFile(packageJson.cloudformation, LEAD_DIR + '/packages/cloudformation/');
+    return copyFile(ROOT + "/" + packageJson.cloudformation, LEAD_DIR + '/packages/cloudformation/');
 }
 
 function deployJson() {
