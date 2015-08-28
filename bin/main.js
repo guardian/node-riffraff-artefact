@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 'use strict';
 
 var AWS = require('aws-sdk');
@@ -88,7 +87,7 @@ function s3Upload(file) {
 
 function createTar() {
     return new Promise(function (resolve, reject) {
-        var target = PACKAGE_DIR + '/' + packageJson.app + '.tgz';
+        var target = PACKAGE_DIR + '/' + packageJson.name + '.tgz';
         var buildDir = packageJson.buildDir || ROOT + "/*";
         console.log("Creating tgz in " + target);
 
