@@ -4,10 +4,10 @@
   "description": "Deploy RiffRaff Artefacts",
   "main": "bin/main.js",
   "bin": {
-      "riffraff-artefact" : "bin/main.js"
+      "riffraff_artefact" : "./bin/main.js"
   },
   "scripts": {
-    "start": "node bin/main.js",
+    "start": "node ./bin/main.js",
     "build": "babel src/riffraff-artefact.js --out-file bin/main.js --source-maps"
   },
   "homepage": "https://github.com/guardian/node-riffraff-artefact",
