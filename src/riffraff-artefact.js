@@ -90,7 +90,7 @@ function s3Upload(file) {
 
 function createTar() {
     return new Promise((resolve, reject) => {
-        var target = PACKAGEJSON_DIR + '/' + packageJson.app + '.tgz';
+        var target = PACKAGE_DIR + '/' + packageJson.app + '.tgz';
         console.log("Creating tgz in " + target);
 
         let result = (error) => {
@@ -102,7 +102,7 @@ function createTar() {
             return resolve();
         };
 
-        const commandString = ["tar czf", target, "./*"].join(" ");
+        const commandString = ["tar czf", target, ROOT + "/*"].join(" ");
         exec(commandString, result);
 
     });
