@@ -1,0 +1,17 @@
+{
+  "name": "node-riffraff-artefact",
+  "version": "1.0.0",
+  "description": "Deploy RiffRaff Artefacts",
+  "main": "bin/main.js",
+  "scripts": {
+    "start": "node bin/main.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "babel src/riffraff-artefact.js --out-file bin/main.js --source-maps"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "aws-sdk": "^2.1.48",
+    "babel": "^5.8.23"
+  }
+}
