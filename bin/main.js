@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 'use strict';
 
 var AWS = require('aws-sdk');
