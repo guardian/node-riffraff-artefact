@@ -132,6 +132,7 @@ function createZip() {
 
 function createDirectories() {
     return Q.promise(function (resolve, reject) {
+        createDir(ROOT + "/target");
         createDir(LEAD_DIR);
         createDir(LEAD_DIR + "/packages");
         createDir(LEAD_DIR + "/packages/cloudformation");
@@ -155,6 +156,8 @@ function buildManifest() {
 }
 
 // run the processes
-clean().then(createDirectories).then(cloudformation).then(deployJson).then(createTar).then(createZip);
+clean().then(createDirectories).then(cloudformation).then(deployJson).then(createTar).then(createZip)['catch'](function (error) {
+    throw error;
+});
 
 //# sourceMappingURL=riffraff-artefact.js.map

@@ -137,6 +137,7 @@ function createZip() {
 
 function createDirectories() {
     return Q.promise((resolve, reject) => {
+        createDir(ROOT + "/target");
         createDir(LEAD_DIR);
         createDir(LEAD_DIR + "/packages");
         createDir(LEAD_DIR + "/packages/cloudformation");
@@ -166,4 +167,7 @@ clean()
     .then(cloudformation)
     .then(deployJson)
     .then(createTar)
-    .then(createZip);
+    .then(createZip)
+    .catch((error) => {
+        throw error;
+    });
