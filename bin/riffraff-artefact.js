@@ -7,7 +7,7 @@ var path = require('path');
 var Q = require('q');
 
 var workingPath = path.dirname(require.main.filename);
-var ROOT = process.argv[2] || workingPath;
+var ROOT = process.env.ARTEFACT_PATH || workingPath;
 
 console.log("Root project path set as " + ROOT);
 
