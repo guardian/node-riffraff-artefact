@@ -100,12 +100,17 @@ function createTar() {
                 process.exit(1);
             }
             console.log("Created tgz file in: ", target);
-            return resolve();
+            return resolve("/tmp/" + packageJson.name);
         };
 
-        var commandString = ["tar czf", target, buildDir].join(" ");
+        var commandString = ["tar czf", "/tmp/" + packageJson.name + ".tgz", buildDir].join(" ");
         exec(commandString, result);
     });
+}
+
+function moveTarToTarget(tempLocation) {
+    var target = PACKAGE_DIR + '/' + packageJson.name + '.tgz';
+    return copyFile(tempLocation, target);
 }
 
 function createZip() {
@@ -156,7 +161,9 @@ function buildManifest() {
 }
 
 // run the processes
-clean().then(createDirectories).then(cloudformation).then(deployJson).then(createTar).then(createZip)['catch'](function (error) {
+clean().then(createDirectories).then(cloudformation).then(deployJson).then(createTar).then(function (tmp) {
+    return moveTarToTarget(tmp);
+}).then(createZip)['catch'](function (error) {
     throw error;
 });
 
