@@ -89,10 +89,9 @@ function s3Upload(file) {
 }
 
 function createTar() {
-    process.chdir(LEAD_DIR);
     return Q.promise(function (resolve, reject) {
         var target = PACKAGE_DIR + '/' + packageJson.name + '.tgz';
-        var buildDir = packageJson.buildDir || ROOT + "/*";
+        var buildDir = packageJson.buildDir || "*";
         console.log("Creating tgz in " + target);
 
         var result = function result(error) {
