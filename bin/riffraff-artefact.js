@@ -100,7 +100,7 @@ function createTar() {
                 process.exit(1);
             }
             console.log("Created tgz file in: ", target);
-            return resolve("/tmp/" + packageJson.name);
+            return resolve("/tmp/" + packageJson.name + ".tgz");
         };
 
         var commandString = ["tar czf", "/tmp/" + packageJson.name + ".tgz", buildDir].join(" ");
