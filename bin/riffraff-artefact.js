@@ -4,6 +4,7 @@ var AWS = require('aws-sdk');
 var exec = require('child_process').exec;
 var fs = require('fs');
 var path = require('path');
+var Q = require('q');
 
 var workingPath = path.dirname(require.main.filename);
 var ROOT = process.argv[2] || workingPath;
@@ -29,7 +30,7 @@ function createDir(dirname) {
 }
 
 function clean() {
-    return new Promise(function (resolve, reject) {
+    return Q.promise(function (resolve, reject) {
         console.log("Cleaning target directory...");
         var result = function result(error) {
             if (error) {
@@ -45,7 +46,7 @@ function clean() {
 }
 
 function copyFile(source, target) {
-    return new Promise(function (resolve, reject) {
+    return Q.promise(function (resolve, reject) {
         var result = function result(error) {
             if (error) {
                 console.log("Failed copying with: " + error.stack);
@@ -88,7 +89,7 @@ function s3Upload(file) {
 }
 
 function createTar() {
-    return new Promise(function (resolve, reject) {
+    return Q.promise(function (resolve, reject) {
         var target = PACKAGE_DIR + '/' + packageJson.name + '.tgz';
         var buildDir = packageJson.buildDir || ROOT + "/*";
         console.log("Creating tgz in " + target);
@@ -110,7 +111,7 @@ function createTar() {
 function createZip() {
     // change directory to the target
     process.chdir(LEAD_DIR);
-    return new Promise(function (resolve, reject) {
+    return Q.promise(function (resolve, reject) {
         var FILENAME = "artifacts.zip";
 
         console.log("Creating zip in ./target/riffraff/" + FILENAME);
@@ -130,7 +131,7 @@ function createZip() {
 }
 
 function createDirectories() {
-    return new Promise(function (resolve, reject) {
+    return Q.promise(function (resolve, reject) {
         createDir(LEAD_DIR);
         createDir(LEAD_DIR + "/packages");
         createDir(LEAD_DIR + "/packages/cloudformation");

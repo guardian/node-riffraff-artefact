@@ -1,10 +1,10 @@
 {
   "name": "node-riffraff-artefact",
-  "version": "1.0.7",
+  "version": "1.1.0",
   "description": "Deploy RiffRaff Artefacts",
   "main": "bin/main",
   "bin": {
-      "riffraff-artefact" : "./bin/main"
+    "riffraff-artefact": "./bin/main"
   },
   "scripts": {
     "start": "node ./bin/main",
@@ -15,10 +15,11 @@
   "license": "ISC",
   "dependencies": {
     "aws-sdk": "^2.1.48",
-    "babel": "^5.8.23"
+    "babel": "^5.8.23",
+    "q": "^1.4.1"
   },
   "repository": {
-       "type" : "git",
-        "url" : "https://github.com/guardian/node-riffraff-artefact.git"
+    "type": "git",
+    "url": "https://github.com/guardian/node-riffraff-artefact.git"
   }
 }
