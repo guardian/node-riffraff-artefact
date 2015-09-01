@@ -5,8 +5,11 @@ var exec = require('child_process').exec;
 var fs = require('fs');
 var path = require('path');
 
-var workingPath = require.main.filename.split("/node_modules")[0];
-var ROOT = workingPath;
+var workingPath = path.dirname(require.main.filename);
+var ROOT = process.argv[2] || workingPath;
+
+console.log("Root project path set as " + ROOT);
+
 var LEAD_DIR = ROOT + "/target/riffraff";
 
 /*
