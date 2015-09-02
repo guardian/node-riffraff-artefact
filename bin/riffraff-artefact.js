@@ -119,7 +119,7 @@ function createZip() {
     // change directory to the target
     process.chdir(SETTINGS.leadDir);
     return Q.promise(function (resolve, reject) {
-        var FILENAME = SETTINGS.artefactFilename;
+        var FILENAME = SETTINGS.artefactsFilename;
 
         console.log("Creating zip in ./target/riffraff/" + FILENAME);
         var result = function result(error) {
