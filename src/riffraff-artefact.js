@@ -50,10 +50,10 @@ function copyFile(source, target) {
 }
 
 
-function s3Upload(file) {
+function s3Upload() {
     return Q.promise((resolve, reject) => {
         const s3 = new AWS.S3();
-
+        const file = SETTINGS.leadDir + "/" + SETTINGS.artifactsFilename;
         const pieces = file.split('/');
         const filename = pieces[pieces.length-1];
 

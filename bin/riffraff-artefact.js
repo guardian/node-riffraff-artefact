@@ -51,10 +51,10 @@ function copyFile(source, target) {
     });
 }
 
-function s3Upload(file) {
+function s3Upload() {
     return Q.promise(function (resolve, reject) {
         var s3 = new AWS.S3();
-
+        var file = SETTINGS.leadDir + "/" + SETTINGS.artifactsFilename;
         var pieces = file.split('/');
         var filename = pieces[pieces.length - 1];
 

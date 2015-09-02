@@ -17,7 +17,7 @@ const packageJson = require(ROOT + "/package.json");
 
 let SETTINGS = {
     rootDir: ROOT,
-    artifactsFilename: "artifacts.zip",
+    artefactsFilename: "artefacts.zip",
     packageName: packageJson.name,
     cloudformation: packageJson.cloudformation || "cloudformation.json",
     buildStartTime: Date.now(),
@@ -25,7 +25,7 @@ let SETTINGS = {
     manifestFile: "build.json",
     vcsURL: packageJson.repository.url || "Unknown",
     vcsRevision: getVcsRevision() || "Unknown",
-    buildId:  getBuildId || "DEV",
+    buildId:  getBuildId() || "DEV",
     artefactBucket: "riffraff-artifact",
     manifestBucket: "riffraff-builds",
     targetDir: ROOT + "/target",
