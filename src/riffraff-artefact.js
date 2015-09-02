@@ -54,8 +54,6 @@ function s3Upload() {
     return Q.promise((resolve, reject) => {
         const s3 = new AWS.S3();
         const file = SETTINGS.leadDir + "/" + SETTINGS.artefactsFilename;
-        const pieces = file.split('/');
-        const filename = pieces[pieces.length-1];
 
         // build the path
         const path = [SETTINGS.packageName, SETTINGS.buildId, SETTINGS.packageName].join("/");
@@ -125,7 +123,7 @@ function createZip() {
     // change directory to the target
     process.chdir(SETTINGS.leadDir);
     return Q.promise((resolve, reject) => {
-        const FILENAME = SETTINGS.artefactBucket;
+        const FILENAME = SETTINGS.artefactFilename;
 
         console.log("Creating zip in ./target/riffraff/" + FILENAME);
         let result = (error) => {
