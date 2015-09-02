@@ -7,7 +7,14 @@ const SETTINGS = require('./settings').SETTINGS;
 function createDir(dirname) {
     if(!fs.existsSync(dirname)) {
         console.log("Creating directory " + dirname);
-        fs.mkdirSync(dirname);
+        return Q.promise((resolve, reject) => {
+            fs.mkdir(dirname, (err) => {
+                if (err) {
+                    reject(err);
+                }
+                resolve();
+            });
+        });
     }
 }
 
@@ -139,14 +146,13 @@ function createZip() {
 
 
 function createDirectories() {
-    return Q.promise((resolve, reject) => {
-        createDir(SETTINGS.targetDir);
-        createDir(SETTINGS.leadDir);
-        createDir(SETTINGS.leadDir + "/packages");
-        createDir(SETTINGS.leadDir + "/packages/cloudformation");
-        createDir(SETTINGS.packageDir);
-        return resolve();
-    });
+    return Q.all([
+        createDir(SETTINGS.targetDir),
+        createDir(SETTINGS.leadDir),
+        createDir(SETTINGS.leadDir + "/packages"),
+        createDir(SETTINGS.leadDir + "/packages/cloudformation"),
+        createDir(SETTINGS.packageDir)
+    ]);
 }
 
 function cloudformation() {
