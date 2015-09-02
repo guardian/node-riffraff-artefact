@@ -3,24 +3,8 @@
 var AWS = require('aws-sdk');
 var exec = require('child_process').exec;
 var fs = require('fs');
-var path = require('path');
 var Q = require('q');
-
-var workingPath = path.dirname(require.main.filename);
-var ROOT = process.env.ARTEFACT_PATH || workingPath;
-
-console.log("Root project path set as " + ROOT);
-
-var LEAD_DIR = ROOT + "/target/riffraff";
-
-/*
- * To be valid packageJson,json must at the very least have
- * a name and a cloudformation field.
- */
-console.log("Reading configuration from package.json");
-var packageJson = require(ROOT + "/package.json");
-
-var PACKAGE_DIR = LEAD_DIR + "/packages/" + packageJson.name;
+var SETTINGS = require('./settings').SETTINGS;
 
 function createDir(dirname) {
     if (!fs.existsSync(dirname)) {
@@ -40,7 +24,7 @@ function clean() {
             return resolve();
         };
 
-        var commandString = ["rm -rf", LEAD_DIR + "/*"].join(" ");
+        var commandString = ["rm -rf", SETTINGS.leadDir + "/*"].join(" ");
         exec(commandString, result);
     });
 }
@@ -61,37 +45,50 @@ function copyFile(source, target) {
 }
 
 function s3Upload(file) {
+    return Q.promise(function (resolve, reject) {
+        var s3 = new AWS.S3();
 
-    var bucket = new AWS.S3({ params: { name: packageJson.bucket } });
-    var pieces = file.split('/');
-    var filename = pieces[pieces.length - 1];
+        var pieces = file.split('/');
+        var filename = pieces[pieces.length - 1];
 
-    // build the bucket path
-    var path = [packageJson.name, packageJson.version, packageJson.name, filename].join("/");
+        // build the path
+        var path = [SETTINGS.packageName, SETTINGS.buildId, SETTINGS.packageName, filename].join("/");
 
-    console.log("Uploading " + path);
+        console.log("Uploading to " + path);
 
-    fs.readFile(file, function (err, data) {
-        var params = {
-            Bucket: packageJson.bucket,
+        fs.readFile(file, function (err, data) {
+            var params = {
+                Bucket: SETTINGS.artefactBucket,
+                Key: path,
+                Body: data
+            };
+
+            s3.upload(params, function (err) {
+                if (err) {
+                    reject(err);
+                }
+                console.log(["Uploaded riffraff artefact to", path, "in", SETTINGS.artefactBucket].join(" "));
+            });
+        });
+
+        // upload the manifest
+        s3.upload({
+            Bucket: SETTINGS.manifestBucket,
             Key: path,
-            Body: data
-        };
-
-        bucket.upload(params, function (err) {
+            Body: buildManifest()
+        }, function (err) {
             if (err) {
-                console.log("Failed with error:", err);
-                process.exit(1);
+                reject(err);
             }
-            console.log("Uploaded file to " + path);
+            console.log(["Uploaded riffraff manifest to", path, "in", SETTINGS.manifestBucket].join(" "));
         });
     });
 }
 
 function createTar() {
     return Q.promise(function (resolve, reject) {
-        var target = PACKAGE_DIR + '/' + packageJson.name + '.tgz';
-        var buildDir = packageJson.buildDir || "*";
+        var target = SETTINGS.packageDir + '/' + SETTINGS.packageName + '.tgz';
+        var buildDir = SETTINGS.buildDir || "*";
         console.log("Creating tgz in " + target);
 
         var result = function result(error) {
@@ -100,22 +97,22 @@ function createTar() {
                 process.exit(1);
             }
             console.log("Created tgz file in: ", target);
-            return resolve("/tmp/" + packageJson.name + ".tgz");
+            return resolve("/tmp/" + SETTINGS.packageName + ".tgz");
         };
 
-        var commandString = ["tar czf", "/tmp/" + packageJson.name + ".tgz", buildDir].join(" ");
+        var commandString = ["tar czf", "/tmp/" + SETTINGS.packageName + ".tgz", buildDir].join(" ");
         exec(commandString, result);
     });
 }
 
 function moveTarToTarget(tempLocation) {
-    var target = PACKAGE_DIR + '/' + packageJson.name + '.tgz';
+    var target = SETTINGS.packageDir + '/' + SETTINGS.packageName + '.tgz';
     return copyFile(tempLocation, target);
 }
 
 function createZip() {
     // change directory to the target
-    process.chdir(LEAD_DIR);
+    process.chdir(SETTINGS.leadDir);
     return Q.promise(function (resolve, reject) {
         var FILENAME = "artifacts.zip";
 
@@ -137,34 +134,54 @@ function createZip() {
 
 function createDirectories() {
     return Q.promise(function (resolve, reject) {
-        createDir(ROOT + "/target");
-        createDir(LEAD_DIR);
-        createDir(LEAD_DIR + "/packages");
-        createDir(LEAD_DIR + "/packages/cloudformation");
-        createDir(PACKAGE_DIR);
+        createDir(SETTINGS.targetDir);
+        createDir(SETTINGS.leadDir);
+        createDir(SETTINGS.leadDir + "/packages");
+        createDir(SETTINGS.leadDir + "/packages/cloudformation");
+        createDir(SETTINGS.packageDir);
         return resolve();
     });
 }
 
 function cloudformation() {
-    return copyFile(ROOT + "/" + packageJson.cloudformation, LEAD_DIR + '/packages/cloudformation/');
+    return copyFile(SETTINGS.rootDir + "/" + SETTINGS.cloudformation, SETTINGS.leadDir + '/packages/cloudformation/');
 }
 
 function deployJson() {
-    return copyFile(ROOT + "/deploy.json", LEAD_DIR);
+    return copyFile(SETTINGS.rootDir + "/deploy.json", SETTINGS.leadDir);
 }
 
 function buildManifest() {
     return {
-        projectName: packageJson.name
+        branch: SETTINGS.projectBranchName,
+        vcsURL: SETTINGS.vcsURL,
+        revision: SETTINGS.vcsRevision,
+        startTime: SETTINGS.buildStartTime,
+        buildNumber: SETTINGS.buildId,
+        projectName: SETTINGS.packageName
     };
 }
 
-// run the processes
-clean().then(createDirectories).then(cloudformation).then(deployJson).then(createTar).then(function (tmp) {
-    return moveTarToTarget(tmp);
-}).then(createZip)['catch'](function (error) {
-    throw error;
-});
+function buildArtefact() {
+    return clean().then(createDirectories).then(cloudformation).then(deployJson).then(createTar).then(function (tmp) {
+        return moveTarToTarget(tmp);
+    }).then(createZip);
+}
+
+function uploadArtefact() {
+    return s3Upload();
+}
+
+function determineAction() {
+    if (SETTINGS.env !== "dev") {
+        buildArtefact().then(uploadArtefact)['catch'](function (err) {
+            throw err;
+        });
+    } else {
+        buildArtefact();
+    }
+}
+
+determineAction();
 
 //# sourceMappingURL=riffraff-artefact.js.map
