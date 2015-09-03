@@ -60,7 +60,7 @@ function s3Upload() {
 
     console.log("Uploading to " + path);
 
-    var manifest = Q.promise(function (resolve, reject) {
+    var artefact = Q.promise(function (resolve, reject) {
         fs.readFile(file, function (err, data) {
             var params = {
                 Bucket: SETTINGS.artefactBucket,
@@ -79,11 +79,11 @@ function s3Upload() {
     });
 
     // upload the manifest
-    var artifact = Q.promise(function (resolve, reject) {
+    var manifest = Q.promise(function (resolve, reject) {
         s3.upload({
             Bucket: SETTINGS.manifestBucket,
             Key: path,
-            Body: buildManifest()
+            Body: JSON.stringify(buildManifest())
         }, function (err) {
             if (err) {
                 throw err;
@@ -93,7 +93,7 @@ function s3Upload() {
         });
     });
 
-    return Q.all([manifest, artifact]);
+    return Q.all([manifest, artefact]);
 }
 
 function createTar() {
