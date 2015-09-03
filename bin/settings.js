@@ -18,7 +18,7 @@ var packageJson = require(ROOT + "/package.json");
 
 var SETTINGS = {
     rootDir: ROOT,
-    artefactsFilename: "arteficts.zip",
+    artefactsFilename: "artifacts.zip",
     packageName: packageJson.name,
     cloudformation: packageJson.cloudformation || "cloudformation.json",
     buildStartTime: Date.now(),
