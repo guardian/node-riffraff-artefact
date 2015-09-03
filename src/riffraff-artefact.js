@@ -69,7 +69,7 @@ function s3Upload() {
 
             s3.upload(params, (err) => {
                 if (err) {
-                    reject(err);
+                    throw new Error(err);
                 }
                 console.log(["Uploaded riffraff artefact to", path, "in",
                              SETTINGS.artefactBucket].join(" "));
@@ -87,7 +87,7 @@ function s3Upload() {
             Body: buildManifest()
         }, (err) => {
             if (err) {
-                reject(err);
+                throw err;
             }
             console.log(["Uploaded riffraff manifest to", path, "in",
                          SETTINGS.manifestBucket].join(" "));
