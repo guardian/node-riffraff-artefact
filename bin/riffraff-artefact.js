@@ -52,15 +52,15 @@ function copyFile(source, target) {
 }
 
 function s3Upload() {
-    return Q.promise(function (resolve, reject) {
-        var s3 = new AWS.S3();
-        var file = SETTINGS.leadDir + "/" + SETTINGS.artefactsFilename;
+    var s3 = new AWS.S3();
+    var file = SETTINGS.leadDir + "/" + SETTINGS.artefactsFilename;
 
-        // build the path
-        var path = [SETTINGS.packageName, SETTINGS.buildId, SETTINGS.packageName].join("/");
+    // build the path
+    var path = [SETTINGS.packageName, SETTINGS.buildId, SETTINGS.packageName].join("/");
 
-        console.log("Uploading to " + path);
+    console.log("Uploading to " + path);
 
+    var manifest = Q.promise(function (resolve, reject) {
         fs.readFile(file, function (err, data) {
             var params = {
                 Bucket: SETTINGS.artefactBucket,
@@ -73,10 +73,13 @@ function s3Upload() {
                     reject(err);
                 }
                 console.log(["Uploaded riffraff artefact to", path, "in", SETTINGS.artefactBucket].join(" "));
+                resolve();
             });
         });
+    });
 
-        // upload the manifest
+    // upload the manifest
+    var artifact = Q.promise(function (resolve, reject) {
         s3.upload({
             Bucket: SETTINGS.manifestBucket,
             Key: path,
@@ -86,8 +89,11 @@ function s3Upload() {
                 reject(err);
             }
             console.log(["Uploaded riffraff manifest to", path, "in", SETTINGS.manifestBucket].join(" "));
+            resolve();
         });
     });
+
+    return Q.all([manifest, artifact]);
 }
 
 function createTar() {
