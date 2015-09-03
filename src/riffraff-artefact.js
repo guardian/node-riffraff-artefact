@@ -55,15 +55,17 @@ function s3Upload() {
     const file = SETTINGS.leadDir + "/" + SETTINGS.artefactsFilename;
 
     // build the path
-    const path = [SETTINGS.packageName, SETTINGS.buildId, SETTINGS.packageName].join("/");
+    const rootPath = [SETTINGS.packageName, SETTINGS.buildId, SETTINGS.packageName].join("/");
 
-    console.log("Uploading to " + path);
 
     var artefact = Q.promise((resolve, reject) => {
+        const artefactPath = rootPath + "/" + SETTINGS.artefactsFilename;
+        console.log("Uploading to " + artefactPath);
+
         fs.readFile(file, (err, data) => {
             const params = {
                 Bucket: SETTINGS.artefactBucket,
-                Key: path,
+                Key: artefactPath,
                 Body: data
             };
 
@@ -71,7 +73,7 @@ function s3Upload() {
                 if (err) {
                     throw new Error(err);
                 }
-                console.log(["Uploaded riffraff artefact to", path, "in",
+                console.log(["Uploaded riffraff artefact to", artefactPath, "in",
                              SETTINGS.artefactBucket].join(" "));
                 resolve();
             });
@@ -81,15 +83,18 @@ function s3Upload() {
 
     // upload the manifest
     var manifest = Q.promise((resolve, reject) => {
+        const manifestPath = rootPath + "/" + SETTINGS.manifestFile;
+        console.log("Uploading to " + manifestPath);
+
         s3.upload({
             Bucket: SETTINGS.manifestBucket,
-            Key: path,
+            Key: manifestPath,
             Body: JSON.stringify(buildManifest())
         }, (err) => {
             if (err) {
                 throw err;
             }
-            console.log(["Uploaded riffraff manifest to", path, "in",
+            console.log(["Uploaded riffraff manifest to", manifestPath, "in",
                          SETTINGS.manifestBucket].join(" "));
             resolve();
         });
