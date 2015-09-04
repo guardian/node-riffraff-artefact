@@ -21,7 +21,7 @@ var SETTINGS = {
     artefactsFilename: "artifacts.zip",
     packageName: packageJson.name,
     cloudformation: packageJson.cloudformation || "cloudformation.json",
-    buildStartTime: Date.now(),
+    buildStartTime: getDate(),
     projectBranchName: getBranchName() || "Unknown",
     manifestFile: "build.json",
     vcsURL: packageJson.repository.url || "Unknown",
@@ -35,6 +35,11 @@ var SETTINGS = {
     buildDir: packageJson.buildDir || undefined,
     env: ENVIRONMENT
 };
+
+function getDate() {
+    var date = new Date();
+    return date.toISOString();
+}
 
 function determineEnvironment() {
     if (process.env.CIRCLECI && process.env.CI) {
@@ -75,7 +80,7 @@ function getBuildId() {
 }
 
 // build tool specific settings - currently only works for CIRCL_CI
-
+console.log(SETTINGS);
 exports.SETTINGS = SETTINGS;
 
 //# sourceMappingURL=settings.js.map
