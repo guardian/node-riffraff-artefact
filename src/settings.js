@@ -23,7 +23,7 @@ let SETTINGS = {
     buildStartTime: getDate(),
     projectBranchName: getBranchName() || "Unknown",
     manifestFile: "build.json",
-    vcsURL: packageJson.repository.url || "Unknown",
+    vcsURL: packageJson.repository || "Unknown",
     vcsRevision: getVcsRevision() || "Unknown",
     buildId:  getBuildId() || "DEV",
     artefactBucket: "riffraff-artifact",
