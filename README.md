@@ -2,8 +2,6 @@
 
 Plugin for building deployable RiffRaff artefacts in Node.
 
-**This is currently in Beta and does not work correctly. Speak to @hmgibson23 if you literally can't wait more than 5 minutes to use it.**
-
 ## Getting Started
 This is a node plugin for creating
 [RiffRaff](https://github.com/guardian/deploy)
@@ -33,3 +31,9 @@ directory (the root). You can configure this by setting ```buildDir```
 to whatever you want in the package.json file. Note that this is the
 root directory that node will be run on. So a package.json with
 relevant run scripts must be present.
+
+### Build environment support
+Currently only [Circle CI](https://circleci.com/) but if you would
+like to add Travis support, please feel free to. It relies on
+environment variables to get information about the build, all of the
+necesary build variables are supported by most continuous integraton tools.
