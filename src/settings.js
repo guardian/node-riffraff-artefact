@@ -44,6 +44,8 @@ function getDate() {
 function determineEnvironment() {
     if (process.env.CIRCLECI && process.env.CI) {
         return "circle-ci";
+    } else if (process.env.TRAVIS && process.env.CI) {
+        return "travis-ci";
     } else {
         return "dev";
     }
@@ -53,6 +55,9 @@ function getBranchName() {
     switch (ENVIRONMENT) {
         case 'circle-ci':
         return process.env.CIRCLE_BRANCH;
+
+        case 'travis-ci':
+        return process.env.TRAVIS_BRANCH;
 
         default:
         return "dev";
@@ -64,6 +69,9 @@ function getVcsRevision() {
         case 'circle-ci':
         return process.env.CIRCLE_SHA1;
 
+        case 'travis-ci':
+        return process.env.TRAVIS_COMMIT;
+
         default:
         return "dev";
     }
@@ -73,6 +81,9 @@ function getBuildId() {
     switch (ENVIRONMENT) {
         case 'circle-ci':
         return process.env.CIRCLE_BUILD_NUM;
+
+        case 'travis-ci':
+        return process.env.TRAVIS_BUILD_NUMBER;
 
         default:
         return "dev";
