@@ -33,7 +33,12 @@ root directory that node will be run on. So a package.json with
 relevant run scripts must be present.
 
 ### Build environment support
-Currently only [Circle CI](https://circleci.com/) but if you would
-like to add Travis support, please feel free to. It relies on
-environment variables to get information about the build, all of the
-necesary build variables are supported by most continuous integraton tools.
+Works on [Circle CI](https://circleci.com/) and [Travis](https://travis-ci.org/).
+If you want to support other continuous integration tools, have a look at `settings.js` and configure the relevant environment variables to get information about the build.
+
+### Contributing
+
+* Clone
+* Update the code
+* `npm build`
+* Commit
