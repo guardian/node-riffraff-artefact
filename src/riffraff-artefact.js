@@ -210,4 +210,12 @@ function determineAction() {
     }
 }
 
-determineAction();
+module.exports = {
+    determineAction: determineAction,
+    settings: SETTINGS,
+    buildManifest: buildManifest
+}
+
+if (require.main === module) {
+    determineAction();
+}
