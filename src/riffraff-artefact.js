@@ -62,21 +62,20 @@ function s3Upload() {
         const artefactPath = rootPath + "/" + SETTINGS.artefactsFilename;
         console.log("Uploading to " + artefactPath);
 
-        fs.readFile(file, (err, data) => {
-            const params = {
-                Bucket: SETTINGS.artefactBucket,
-                Key: artefactPath,
-                Body: data
-            };
-
-            s3.upload(params, (err) => {
-                if (err) {
-                    throw new Error(err);
-                }
-                console.log(["Uploaded riffraff artefact to", artefactPath, "in",
-                             SETTINGS.artefactBucket].join(" "));
-                resolve();
-            });
+        const stream = fs.createReadStream(file);
+        const params = {
+            Bucket: SETTINGS.artefactBucket,
+            Key: artefactPath,
+            Body: stream,
+            ACL: "bucket-owner-full-control"
+        };
+        s3.upload(params, (err) => {
+            if (err) {
+                throw new Error(err);
+            }
+            console.log(["Uploaded riffraff artefact to", artefactPath, "in",
+                         SETTINGS.artefactBucket].join(" "));
+            resolve();
         });
     });
 
@@ -89,7 +88,8 @@ function s3Upload() {
         s3.upload({
             Bucket: SETTINGS.manifestBucket,
             Key: manifestPath,
-            Body: JSON.stringify(buildManifest())
+            Body: JSON.stringify(buildManifest()),
+            ACL: "bucket-owner-full-control"
         }, (err) => {
             if (err) {
                 throw err;
