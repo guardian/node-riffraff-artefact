@@ -213,7 +213,8 @@ function determineAction() {
 module.exports = {
     determineAction: determineAction,
     settings: SETTINGS,
-    buildManifest: buildManifest
+    buildManifest: buildManifest,
+    s3Upload: s3Upload
 }
 
 if (require.main === module) {
