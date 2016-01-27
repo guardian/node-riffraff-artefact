@@ -1,6 +1,5 @@
 const path = require('path');
 
-
 const workingPath = path.dirname(require.main.filename);
 const ROOT = process.env.ARTEFACT_PATH || workingPath;
 const ENVIRONMENT = determineEnvironment();
@@ -57,7 +56,7 @@ function getBranchName() {
         return process.env.CIRCLE_BRANCH;
 
         case 'travis-ci':
-        return process.env.TRAVIS_BRANCH;
+        return process.env.TRAVIS_PULL_REQUEST === 'false' ? process.env.TRAVIS_BRANCH : process.env.TRAVIS_PULL_REQUEST;
 
         default:
         return "dev";
