@@ -4,9 +4,11 @@ const fs = require('fs');
 const Q = require('q');
 const SETTINGS = require('./settings').SETTINGS;
 
+const log = SETTINGS.verbose ? console.log.bind(console) : function () {};
+
 function createDir(dirname) {
     if(!fs.existsSync(dirname)) {
-        console.log("Creating directory " + dirname);
+        log("Creating directory " + dirname);
         return Q.promise((resolve, reject) => {
             fs.mkdir(dirname, (err) => {
                 if (err) {
@@ -20,10 +22,10 @@ function createDir(dirname) {
 
 function clean() {
     return Q.promise((resolve, reject) => {
-        console.log("Cleaning target directory...");
+        log("Cleaning target directory...");
         let result = (error) =>  {
             if (error) {
-                console.log("Failed deleting with: " + error.stack);
+                console.error("Failed deleting with: " + error.stack);
                 process.exit(1);
             }
             return resolve();
@@ -38,7 +40,7 @@ function copyFile(source, target) {
     return Q.promise((resolve, reject) => {
         let result = (error) => {
             if (error) {
-                console.log("Failed copying with: " + error.stack);
+                console.error("Failed copying with: " + error.stack);
                 process.exit(1);
             }
             return resolve(target);
@@ -60,7 +62,7 @@ function s3Upload() {
 
     var artefact = Q.promise((resolve, reject) => {
         const artefactPath = rootPath + "/" + SETTINGS.artefactsFilename;
-        console.log("Uploading to " + artefactPath);
+        log("Uploading to " + artefactPath);
 
         const stream = fs.createReadStream(file);
         const params = {
@@ -83,7 +85,7 @@ function s3Upload() {
     // upload the manifest
     var manifest = Q.promise((resolve, reject) => {
         const manifestPath = rootPath + "/" + SETTINGS.manifestFile;
-        console.log("Uploading to " + manifestPath);
+        log("Uploading to " + manifestPath);
 
         s3.upload({
             Bucket: SETTINGS.manifestBucket,
@@ -107,14 +109,14 @@ function createTar() {
     return Q.promise((resolve, reject) => {
         const target = SETTINGS.packageDir + '/' + SETTINGS.packageName + '.tgz';
         const buildDir = SETTINGS.buildDir || ("*");
-        console.log("Creating tgz in " + target);
+        log("Creating tgz in " + target);
 
         let result = (error) => {
             if (error) {
-                console.log("Failed to create tar with: " + error.stack);
+                console.error("Failed to create tar with: " + error.stack);
                 process.exit(1);
             }
-            console.log("Created tgz file in: ", target);
+            log("Created tgz file in: ", target);
             return resolve("/tmp/" + SETTINGS.packageName + ".tgz");
         };
 
@@ -136,13 +138,13 @@ function createZip() {
     return Q.promise((resolve, reject) => {
         const FILENAME = SETTINGS.artefactsFilename;
 
-        console.log("Creating zip in ./target/riffraff/" + FILENAME);
+        log("Creating zip in ./target/riffraff/" + FILENAME);
         let result = (error) => {
             if (error) {
-                console.log("Failed to create zip with: " + error.stack);
+                console.error("Failed to create zip with: " + error.stack);
                 process.exit(1);
             }
-            console.log("Created zip file in ./target/riffraff/" + FILENAME);
+            log("Created zip file in ./target/riffraff/" + FILENAME);
 
             return resolve(FILENAME);
         };
