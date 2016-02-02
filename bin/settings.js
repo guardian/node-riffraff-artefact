@@ -97,5 +97,3 @@ function getBuildId() {
 // build tool specific settings - currently only works for CIRCL_CI
 log(SETTINGS);
 exports.SETTINGS = SETTINGS;
-
-//# sourceMappingURL=settings.js.map
