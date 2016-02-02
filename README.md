@@ -25,6 +25,8 @@ the artefact for you and upload it to S3.
 You may then wish to add build hooks into whatever continuous
 deployment you're using to deploy your artefact.
 
+You can enable more verbose logging setting the environment variable `VERBOSE=true`.
+
 ### Configuring the Default build directory
 By default, this plugin will build the tgz file from the default
 directory (the root). You can configure this by setting ```buildDir```
