@@ -1,6 +1,6 @@
 {
     "name": "node-riffraff-artefact",
-    "version": "1.3.8",
+    "version": "1.4.0",
     "description": "Deploy RiffRaff Artefacts",
     "main": "bin/riffraff-artefact",
     "bin": {
@@ -8,17 +8,16 @@
     },
     "scripts": {
         "start": "node ./bin/main",
-        "build-main": "babel src/riffraff-artefact.js --out-file bin/riffraff-artefact.js --source-maps",
-        "build-settings": "babel src/settings.js --out-file bin/settings.js --source-maps",
-        "build": "npm run build-main && npm run build-settings"
+        "build": "babel src -d bin"
 
     },
     "homepage": "https://github.com/guardian/node-riffraff-artefact",
     "author": "Hugo Gibson",
     "license": "ISC",
     "dependencies": {
-        "aws-sdk": "^2.2.32",
-        "babel": "^5.8.23",
+        "aws-sdk": "^2.2.33",
+        "babel-cli": "^6.4.5",
+        "babel-preset-es2015": "^6.3.13",
         "q": "^1.4.1"
     },
     "repository": {

@@ -184,7 +184,7 @@ function uploadArtefact() {
 
 function determineAction() {
     if (SETTINGS.env !== "dev") {
-        buildArtefact().then(uploadArtefact)['catch'](function (err) {
+        buildArtefact().then(uploadArtefact).catch(function (err) {
             throw err;
         });
     } else {
@@ -202,5 +202,3 @@ module.exports = {
 if (require.main === module) {
     determineAction();
 }
-
-//# sourceMappingURL=riffraff-artefact.js.map
