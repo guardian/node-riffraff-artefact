@@ -49,6 +49,8 @@ function determineEnvironment() {
         return "circle-ci";
     } else if (process.env.TRAVIS && process.env.CI) {
         return "travis-ci";
+    } else if (process.env.JENKINS_URL) {
+        return "jenkins";        
     } else {
         return "dev";
     }
@@ -62,6 +64,9 @@ function getBranchName() {
         case 'travis-ci':
         return process.env.TRAVIS_PULL_REQUEST === 'false' ? process.env.TRAVIS_BRANCH : process.env.TRAVIS_PULL_REQUEST;
 
+        case 'jenkins':
+        return process.env.GIT_BRANCH;
+
         default:
         return "dev";
     }
@@ -74,6 +79,9 @@ function getVcsRevision() {
 
         case 'travis-ci':
         return process.env.TRAVIS_COMMIT;
+        
+        case 'jenkins':
+        return process.env.GIT_COMMIT;
 
         default:
         return "dev";
@@ -87,6 +95,9 @@ function getBuildId() {
 
         case 'travis-ci':
         return process.env.TRAVIS_BUILD_NUMBER;
+        
+        case 'jenkins':
+        return process.env.BUILD_NUMBER;
 
         default:
         return "dev";
