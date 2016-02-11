@@ -2,16 +2,16 @@ const AWS = require('aws-sdk');
 const exec = require('child_process').exec;
 const fs = require('fs');
 const Q = require('q');
-const util = require('./util')
+const util = require('./lib/util')
 
 const SETTINGS = require('./settings').SETTINGS;
 
-
-const log = SETTINGS.verbose ? console.log.bind(console) : function () {};
-
 function clean() {
+    util.log("Cleaning target ...")
+    const target = SETTINGS.leadDir + "/*";
+
     return Q.promise((resolve, reject) => {
-        log("Cleaning target directory...");
+
         let result = (error) =>  {
             if (error) {
                 console.error("Failed deleting with: " + error.stack);
@@ -21,6 +21,7 @@ function clean() {
         };
 
         const commandString = ["rm -rf", SETTINGS.leadDir + "/*"].join(" ");
+        util.log("Running: " + commandString);
         exec(commandString, result);
     });
 }
@@ -35,7 +36,7 @@ function s3Upload() {
 
     var artefact = Q.promise((resolve, reject) => {
         const artefactPath = rootPath + "/" + SETTINGS.artefactsFilename;
-        log("Uploading to " + artefactPath);
+        util.log("Uploading to " + artefactPath);
 
         const stream = fs.createReadStream(file);
         const params = {
@@ -57,7 +58,7 @@ function s3Upload() {
     // upload the manifest
     var manifest = Q.promise((resolve, reject) => {
         const manifestPath = rootPath + "/" + SETTINGS.manifestFile;
-        log("Uploading to " + manifestPath);
+        util.log("Uploading to " + manifestPath);
 
         s3.upload({
             Bucket: SETTINGS.manifestBucket,
@@ -97,6 +98,8 @@ function packageArtefact() {
 }
 
 function createDirectories() {
+    util.log("Creating directories ...")
+
     return Q.all([
         util.createDir(SETTINGS.targetDir),
         util.createDir(SETTINGS.leadDir),
