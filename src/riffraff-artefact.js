@@ -2,23 +2,12 @@ const AWS = require('aws-sdk');
 const exec = require('child_process').exec;
 const fs = require('fs');
 const Q = require('q');
+const util = require('./util')
+
 const SETTINGS = require('./settings').SETTINGS;
 
-const log = SETTINGS.verbose ? console.log.bind(console) : function () {};
 
-function createDir(dirname) {
-    if(!fs.existsSync(dirname)) {
-        log("Creating directory " + dirname);
-        return Q.promise((resolve, reject) => {
-            fs.mkdir(dirname, (err) => {
-                if (err) {
-                    reject(err);
-                }
-                resolve();
-            });
-        });
-    }
-}
+const log = SETTINGS.verbose ? console.log.bind(console) : function () {};
 
 function clean() {
     return Q.promise((resolve, reject) => {
@@ -36,21 +25,6 @@ function clean() {
     });
 }
 
-function copyFile(source, target) {
-    return Q.promise((resolve, reject) => {
-        let result = (error) => {
-            if (error) {
-                console.error("Failed copying with: " + error.stack);
-                process.exit(1);
-            }
-            return resolve(target);
-        };
-
-        const commandString = ["cp", source, target].join(" ");
-        exec(commandString, result);
-    });
-}
-
 
 function s3Upload() {
     const s3 = new AWS.S3();
@@ -58,7 +32,6 @@ function s3Upload() {
 
     // build the path
     const rootPath = [SETTINGS.packageName, SETTINGS.buildId].join("/");
-
 
     var artefact = Q.promise((resolve, reject) => {
         const artefactPath = rootPath + "/" + SETTINGS.artefactsFilename;
@@ -80,7 +53,6 @@ function s3Upload() {
             resolve();
         });
     });
-
 
     // upload the manifest
     var manifest = Q.promise((resolve, reject) => {
@@ -105,74 +77,42 @@ function s3Upload() {
     return Q.all([manifest, artefact]);
 }
 
-function createTar() {
-    return Q.promise((resolve, reject) => {
-        const target = SETTINGS.packageDir + '/' + SETTINGS.packageName + '.tgz';
-        const buildDir = SETTINGS.buildDir || ("*");
-        log("Creating tgz in " + target);
+function compressResource() {
+    const sourceDir    = SETTINGS.buildDir || ".";
+    const targetFolder = SETTINGS.packageDir;
+    const targetName   = SETTINGS.packageName; 
 
-        let result = (error) => {
-            if (error) {
-                console.error("Failed to create tar with: " + error.stack);
-                process.exit(1);
-            }
-            log("Created tgz file in: ", target);
-            return resolve("/tmp/" + SETTINGS.packageName + ".tgz");
-        };
+    const zipIt = () => util.createZip(sourceDir, targetFolder, targetName);
+    const tarIt = () => util.createTar(sourceDir, targetFolder, targetName);
 
-        const commandString = ["tar czf", "/tmp/" + SETTINGS.packageName + ".tgz" ,
-                               buildDir].join(" ");
-        exec(commandString, result);
-
-    });
+    return SETTINGS.isAwsLambda ? zipIt() : tarIt() 
 }
 
-function moveTarToTarget(tempLocation) {
-    const target = SETTINGS.packageDir + '/' + SETTINGS.packageName + '.tgz';
-    return copyFile(tempLocation, target);
+function packageArtefact() {
+    const sourceDir = SETTINGS.leadDir;
+    const targetDir = SETTINGS.leadDir;
+    const targetName = SETTINGS.artefactsFilename;
+
+    return util.createZip(sourceDir, targetDir, targetName); 
 }
-
-function createZip() {
-    // change directory to the target
-    process.chdir(SETTINGS.leadDir);
-    return Q.promise((resolve, reject) => {
-        const FILENAME = SETTINGS.artefactsFilename;
-
-        log("Creating zip in ./target/riffraff/" + FILENAME);
-        let result = (error) => {
-            if (error) {
-                console.error("Failed to create zip with: " + error.stack);
-                process.exit(1);
-            }
-            log("Created zip file in ./target/riffraff/" + FILENAME);
-
-            return resolve(FILENAME);
-        };
-
-        const commandString = ["zip -r", FILENAME, "./*"].join(" ");
-        exec(commandString, result);
-    });
-}
-
-
 
 function createDirectories() {
     return Q.all([
-        createDir(SETTINGS.targetDir),
-        createDir(SETTINGS.leadDir),
-        createDir(SETTINGS.leadDir + "/packages"),
-        createDir(SETTINGS.leadDir + "/packages/cloudformation"),
-        createDir(SETTINGS.packageDir)
+        util.createDir(SETTINGS.targetDir),
+        util.createDir(SETTINGS.leadDir),
+        util.createDir(SETTINGS.leadDir + "/packages"),
+        util.createDir(SETTINGS.leadDir + "/packages/cloudformation"),
+        util.createDir(SETTINGS.packageDir)
     ]);
 }
 
 function cloudformation() {
-    return copyFile(SETTINGS.rootDir + "/" + SETTINGS.cloudformation,
+    return util.copyFile(SETTINGS.rootDir + "/" + SETTINGS.cloudformation,
                     SETTINGS.leadDir + '/packages/cloudformation/');
 }
 
 function deployJson() {
-    return copyFile(SETTINGS.rootDir + "/deploy.json", SETTINGS.leadDir);
+    return util.copyFile(SETTINGS.rootDir + "/deploy.json", SETTINGS.leadDir);
 }
 
 function buildManifest() {
@@ -191,9 +131,8 @@ function buildArtefact() {
         .then(createDirectories)
         .then(cloudformation)
         .then(deployJson)
-        .then(createTar)
-        .then((tmp) => { return moveTarToTarget(tmp); })
-        .then(createZip);
+        .then(compressResource)
+        .then(packageArtefact);
 }
 
 function uploadArtefact() {
