@@ -15,13 +15,15 @@ util.log("Root project path set as " + ROOT);
  * a name and a cloudformation field.
  */
 util.log("Reading configuration from " + ROOT + "/package.json");
+
 var packageJson = require(ROOT + "/package.json");
+var cf = packageJson.cloudformation;
 
 var SETTINGS = {
     rootDir: ROOT,
     artefactsFilename: "artifacts.zip",
     packageName: packageJson.name,
-    cloudformation: packageJson.cloudformation || "cloudformation.json",
+    cloudformation: cf == undefined ? "cloudformation.json" : cf,
     buildStartTime: getDate(),
     projectBranchName: getBranchName() || "Unknown",
     manifestFile: "build.json",

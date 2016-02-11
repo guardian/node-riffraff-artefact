@@ -103,11 +103,21 @@ function packageArtefact() {
 function createDirectories() {
     util.log("Creating directories ...");
 
-    return Q.all([util.createDir(SETTINGS.targetDir), util.createDir(SETTINGS.leadDir), util.createDir(SETTINGS.leadDir + "/packages"), util.createDir(SETTINGS.leadDir + "/packages/cloudformation"), util.createDir(SETTINGS.packageDir)]);
+    return Q.all([util.createDir(SETTINGS.targetDir), util.createDir(SETTINGS.leadDir), util.createDir(SETTINGS.leadDir + "/packages"), util.createDir(SETTINGS.packageDir)]);
+}
+
+function copyResources() {
+    var possibleActions = [[cloudformation, SETTINGS.cloudformation], [deployJson, true]];
+
+    return Q.all(possibleActions.filter(function (a) {
+        return a[1];
+    }).map(function (a) {
+        return a[0]();
+    }));
 }
 
 function cloudformation() {
-    return util.copyFile(SETTINGS.rootDir + "/" + SETTINGS.cloudformation, SETTINGS.leadDir + '/packages/cloudformation/');
+    return Q.all([util.createDir(SETTINGS.leadDir + "/packages/cloudformation"), util.copyFile(SETTINGS.rootDir + "/" + SETTINGS.cloudformation, SETTINGS.leadDir + '/packages/cloudformation/')]);
 }
 
 function deployJson() {
@@ -126,7 +136,7 @@ function buildManifest() {
 }
 
 function buildArtefact() {
-    return clean().then(createDirectories).then(cloudformation).then(deployJson).then(compressResource).then(packageArtefact);
+    return clean().then(createDirectories).then(copyResources).then(compressResource).then(packageArtefact);
 }
 
 function uploadArtefact() {
@@ -134,13 +144,13 @@ function uploadArtefact() {
 }
 
 function determineAction() {
-    if (SETTINGS.env !== "dev") {
+    var buildAndDeployArtefact = function buildAndDeployArtefact() {
         buildArtefact().then(uploadArtefact).catch(function (err) {
             throw err;
         });
-    } else {
-        buildArtefact();
-    }
+    };
+
+    SETTINGS.env !== "dev" ? buildAndDeployArtefact() : buildArtefact();
 }
 
 module.exports = {

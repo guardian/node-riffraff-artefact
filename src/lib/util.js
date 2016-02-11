@@ -55,7 +55,7 @@ function createZip(sourceDir, targetFolder, targetName) {
 
         const commandString = ["zip -r", targetLocation, sourceFiles].join(" ");
         log("Running: " + commandString);
-        exec(commandString, result);
+        exec(commandString, {maxBuffer: 1024 * 1000}, result);
     });
 }
 
