@@ -40,7 +40,9 @@ function copyFile(source, target) {
 
 function createZip(sourceDir, targetFolder, targetName) {
     const targetLocation = [targetFolder, "/", targetName.replace(".zip",""), ".zip"].join("");
-    const sourceFiles = sourceDir + "/*";
+
+    const sourceFiles = "./*";
+    process.chdir(sourceDir)
 
     return Q.promise((resolve, reject) => {
         let result = (error) => {
