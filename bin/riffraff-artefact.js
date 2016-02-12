@@ -4,27 +4,16 @@ var AWS = require('aws-sdk');
 var exec = require('child_process').exec;
 var fs = require('fs');
 var Q = require('q');
+var util = require('./lib/util');
+
 var SETTINGS = require('./settings').SETTINGS;
 
-var log = SETTINGS.verbose ? console.log.bind(console) : function () {};
-
-function createDir(dirname) {
-    if (!fs.existsSync(dirname)) {
-        log("Creating directory " + dirname);
-        return Q.promise(function (resolve, reject) {
-            fs.mkdir(dirname, function (err) {
-                if (err) {
-                    reject(err);
-                }
-                resolve();
-            });
-        });
-    }
-}
-
 function clean() {
+    util.log("Cleaning target ...");
+    var target = SETTINGS.leadDir + "/*";
+
     return Q.promise(function (resolve, reject) {
-        log("Cleaning target directory...");
+
         var result = function result(error) {
             if (error) {
                 console.error("Failed deleting with: " + error.stack);
@@ -34,21 +23,7 @@ function clean() {
         };
 
         var commandString = ["rm -rf", SETTINGS.leadDir + "/*"].join(" ");
-        exec(commandString, result);
-    });
-}
-
-function copyFile(source, target) {
-    return Q.promise(function (resolve, reject) {
-        var result = function result(error) {
-            if (error) {
-                console.error("Failed copying with: " + error.stack);
-                process.exit(1);
-            }
-            return resolve(target);
-        };
-
-        var commandString = ["cp", source, target].join(" ");
+        util.log("Running: " + commandString);
         exec(commandString, result);
     });
 }
@@ -62,7 +37,7 @@ function s3Upload() {
 
     var artefact = Q.promise(function (resolve, reject) {
         var artefactPath = rootPath + "/" + SETTINGS.artefactsFilename;
-        log("Uploading to " + artefactPath);
+        util.log("Uploading to " + artefactPath);
 
         var stream = fs.createReadStream(file);
         var params = {
@@ -83,7 +58,7 @@ function s3Upload() {
     // upload the manifest
     var manifest = Q.promise(function (resolve, reject) {
         var manifestPath = rootPath + "/" + SETTINGS.manifestFile;
-        log("Uploading to " + manifestPath);
+        util.log("Uploading to " + manifestPath);
 
         s3.upload({
             Bucket: SETTINGS.manifestBucket,
@@ -102,63 +77,51 @@ function s3Upload() {
     return Q.all([manifest, artefact]);
 }
 
-function createTar() {
-    return Q.promise(function (resolve, reject) {
-        var target = SETTINGS.packageDir + '/' + SETTINGS.packageName + '.tgz';
-        var buildDir = SETTINGS.buildDir || "*";
-        log("Creating tgz in " + target);
+function compressResource() {
+    var sourceDir = SETTINGS.buildDir || ".";
+    var targetFolder = SETTINGS.packageDir;
+    var targetName = SETTINGS.packageName;
 
-        var result = function result(error) {
-            if (error) {
-                console.error("Failed to create tar with: " + error.stack);
-                process.exit(1);
-            }
-            log("Created tgz file in: ", target);
-            return resolve("/tmp/" + SETTINGS.packageName + ".tgz");
-        };
+    var zipIt = function zipIt() {
+        return util.createZip(sourceDir, targetFolder, targetName);
+    };
+    var tarIt = function tarIt() {
+        return util.createTar(sourceDir, targetFolder, targetName);
+    };
 
-        var commandString = ["tar czf", "/tmp/" + SETTINGS.packageName + ".tgz", buildDir].join(" ");
-        exec(commandString, result);
-    });
+    return SETTINGS.isAwsLambda ? zipIt() : tarIt();
 }
 
-function moveTarToTarget(tempLocation) {
-    var target = SETTINGS.packageDir + '/' + SETTINGS.packageName + '.tgz';
-    return copyFile(tempLocation, target);
-}
+function packageArtefact() {
+    var sourceDir = SETTINGS.leadDir;
+    var targetDir = SETTINGS.leadDir;
+    var targetName = SETTINGS.artefactsFilename;
 
-function createZip() {
-    // change directory to the target
-    process.chdir(SETTINGS.leadDir);
-    return Q.promise(function (resolve, reject) {
-        var FILENAME = SETTINGS.artefactsFilename;
-
-        log("Creating zip in ./target/riffraff/" + FILENAME);
-        var result = function result(error) {
-            if (error) {
-                console.error("Failed to create zip with: " + error.stack);
-                process.exit(1);
-            }
-            log("Created zip file in ./target/riffraff/" + FILENAME);
-
-            return resolve(FILENAME);
-        };
-
-        var commandString = ["zip -r", FILENAME, "./*"].join(" ");
-        exec(commandString, result);
-    });
+    return util.createZip(sourceDir, targetDir, targetName);
 }
 
 function createDirectories() {
-    return Q.all([createDir(SETTINGS.targetDir), createDir(SETTINGS.leadDir), createDir(SETTINGS.leadDir + "/packages"), createDir(SETTINGS.leadDir + "/packages/cloudformation"), createDir(SETTINGS.packageDir)]);
+    util.log("Creating directories ...");
+
+    return Q.all([util.createDir(SETTINGS.targetDir), util.createDir(SETTINGS.leadDir), util.createDir(SETTINGS.leadDir + "/packages"), util.createDir(SETTINGS.packageDir)]);
+}
+
+function copyResources() {
+    var possibleActions = [[cloudformation, SETTINGS.cloudformation], [deployJson, true]];
+
+    return Q.all(possibleActions.filter(function (a) {
+        return a[1];
+    }).map(function (a) {
+        return a[0]();
+    }));
 }
 
 function cloudformation() {
-    return copyFile(SETTINGS.rootDir + "/" + SETTINGS.cloudformation, SETTINGS.leadDir + '/packages/cloudformation/');
+    return Q.all([util.createDir(SETTINGS.leadDir + "/packages/cloudformation"), util.copyFile(SETTINGS.rootDir + "/" + SETTINGS.cloudformation, SETTINGS.leadDir + '/packages/cloudformation/')]);
 }
 
 function deployJson() {
-    return copyFile(SETTINGS.rootDir + "/deploy.json", SETTINGS.leadDir);
+    return util.copyFile(SETTINGS.rootDir + "/deploy.json", SETTINGS.leadDir);
 }
 
 function buildManifest() {
@@ -173,9 +136,7 @@ function buildManifest() {
 }
 
 function buildArtefact() {
-    return clean().then(createDirectories).then(cloudformation).then(deployJson).then(createTar).then(function (tmp) {
-        return moveTarToTarget(tmp);
-    }).then(createZip);
+    return clean().then(createDirectories).then(copyResources).then(compressResource).then(packageArtefact);
 }
 
 function uploadArtefact() {
@@ -183,13 +144,13 @@ function uploadArtefact() {
 }
 
 function determineAction() {
-    if (SETTINGS.env !== "dev") {
+    var buildAndDeployArtefact = function buildAndDeployArtefact() {
         buildArtefact().then(uploadArtefact).catch(function (err) {
             throw err;
         });
-    } else {
-        buildArtefact();
-    }
+    };
+
+    SETTINGS.env !== "dev" ? buildAndDeployArtefact() : buildArtefact();
 }
 
 module.exports = {
