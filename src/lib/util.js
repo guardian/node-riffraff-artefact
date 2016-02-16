@@ -2,6 +2,7 @@ const exec = require('child_process').exec;
 const fs = require('fs');
 const Q = require('q');
 
+const SETTINGS = require('../settings').SETTINGS;
 
 const log = (process.env.VERBOSE === "true") ? console.log.bind(console) : function () {};
 
@@ -57,7 +58,7 @@ function createZip(sourceDir, targetFolder, targetName) {
 
         const commandString = ["zip -r", targetLocation, sourceFiles].join(" ");
         log("Running: " + commandString);
-        exec(commandString, {maxBuffer: 1024 * 1000}, result);
+        exec(commandString, {maxBuffer: SETTINGS.bufferSize}, result);
     });
 }
 

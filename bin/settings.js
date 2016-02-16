@@ -37,6 +37,7 @@ var SETTINGS = {
     leadDir: ROOT + "/target/riffraff",
     packageDir: ROOT + "/target/riffraff/packages/" + packageJson.name,
     buildDir: packageJson.buildDir || undefined,
+    bufferSize: parseInt(process.env.NODE_STDOUT_BUFFER || 1024 * 5000),
     env: ENVIRONMENT
 };
 
