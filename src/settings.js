@@ -5,14 +5,17 @@ const workingPath = path.dirname(require.main.filename);
 const ROOT = process.env.ARTEFACT_PATH || workingPath;
 const ENVIRONMENT = determineEnvironment();
 
-util.log("Determined running in: " + ENVIRONMENT);
-util.log("Root project path set as " + ROOT);
+const log = (process.env.VERBOSE === "true") ? console.log.bind(console) : function () {};
+
+
+log("Determined running in: " + ENVIRONMENT);
+log("Root project path set as " + ROOT);
 
 /*
  * To be valid packageJson,json must at the very least have
  * a name and a cloudformation field.
  */
-util.log("Reading configuration from " + ROOT + "/package.json");
+log("Reading configuration from " + ROOT + "/package.json");
 
 const packageJson = require(ROOT + "/package.json");
 const cf = packageJson.cloudformation
@@ -106,5 +109,5 @@ function getBuildId() {
 }
 
 // build tool specific settings - currently only works for CIRCL_CI
-util.log(SETTINGS);
+log(SETTINGS);
 exports.SETTINGS = SETTINGS;
