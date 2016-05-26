@@ -54,8 +54,8 @@ function s3Upload() {
         });
     });
 
-    // upload the manifest
-    var manifest = Q.promise((resolve) => {
+    // upload the manifest after the artefact completes
+    var manifest = artefact.then(() => Q.promise((resolve) => {
         const manifestPath = rootPath + "/" + SETTINGS.manifestFile;
         util.log("Uploading to " + manifestPath);
 
@@ -72,7 +72,7 @@ function s3Upload() {
                          SETTINGS.manifestBucket].join(" "));
             resolve();
         });
-    });
+    }));
 
     return Q.all([manifest, artefact]);
 }
