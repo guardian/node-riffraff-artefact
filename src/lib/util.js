@@ -1,15 +1,15 @@
-const exec = require('child_process').exec;
-const fs = require('fs');
-const Q = require('q');
+const exec = require("child_process").exec;
+const fs = require("fs");
+const Q = require("q");
 
-const SETTINGS = require('../settings').SETTINGS;
+const SETTINGS = require("../settings").SETTINGS;
 
 const log = (process.env.VERBOSE === "true") ? console.log.bind(console) : function () {};
 
 function createDir(dirname) {
     log("Creating directory " + dirname);
 
-    if(!fs.existsSync(dirname)) {
+    if (!fs.existsSync(dirname)) {
         return Q.promise((resolve, reject) => {
             fs.mkdir(dirname, (err) => {
                 if (err) {
@@ -24,7 +24,7 @@ function createDir(dirname) {
 function copyFile(source, target) {
     log(["Copying", source, "to", target].join(" "));
 
-    return Q.promise((resolve, reject) => {
+    return Q.promise((resolve) => {
         let result = (error) => {
             if (error) {
                 console.error("Failed copying with: " + error.stack);
@@ -43,9 +43,9 @@ function createZip(sourceDir, targetFolder, targetName) {
     const targetLocation = [targetFolder, "/", targetName.replace(".zip",""), ".zip"].join("");
 
     const sourceFiles = "./*";
-    process.chdir(sourceDir)
+    process.chdir(sourceDir);
 
-    return Q.promise((resolve, reject) => {
+    return Q.promise((resolve) => {
         let result = (error) => {
             if (error) {
                 console.error("Failed to create zip with: " + error.stack);
@@ -65,7 +65,7 @@ function createZip(sourceDir, targetFolder, targetName) {
 function createTar(sourceDir, targetFolder, targetName) {
     const targetLocation = [targetFolder, "/", targetName.replace(".tgz",""), ".tgz"].join("");
 
-    return Q.promise((resolve, reject) => {
+    return Q.promise((resolve) => {
         let result = (error) => {
             if (error) {
                 console.error("Failed to create tar with: " + error.stack);
@@ -89,4 +89,4 @@ module.exports = {
     createZip,
     createTar,
     copyFile
-}
+};

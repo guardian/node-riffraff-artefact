@@ -1,16 +1,15 @@
-const AWS = require('aws-sdk');
-const exec = require('child_process').exec;
-const fs = require('fs');
-const Q = require('q');
-const util = require('./lib/util')
+const AWS = require("aws-sdk");
+const exec = require("child_process").exec;
+const fs = require("fs");
+const Q = require("q");
+const util = require("./lib/util");
 
-const SETTINGS = require('./settings').SETTINGS;
+const SETTINGS = require("./settings").SETTINGS;
 
 function clean() {
-    util.log("Cleaning target ...")
-    const target = SETTINGS.leadDir + "/*";
+    util.log("Cleaning target ...");
 
-    return Q.promise((resolve, reject) => {
+    return Q.promise((resolve) => {
 
         let result = (error) =>  {
             if (error) {
@@ -34,7 +33,7 @@ function s3Upload() {
     // build the path
     const rootPath = [SETTINGS.packageName, SETTINGS.buildId].join("/");
 
-    var artefact = Q.promise((resolve, reject) => {
+    var artefact = Q.promise((resolve) => {
         const artefactPath = rootPath + "/" + SETTINGS.artefactsFilename;
         util.log("Uploading to " + artefactPath);
 
@@ -56,7 +55,7 @@ function s3Upload() {
     });
 
     // upload the manifest
-    var manifest = Q.promise((resolve, reject) => {
+    var manifest = Q.promise((resolve) => {
         const manifestPath = rootPath + "/" + SETTINGS.manifestFile;
         util.log("Uploading to " + manifestPath);
 
@@ -81,12 +80,12 @@ function s3Upload() {
 function compressResource() {
     const sourceDir    = SETTINGS.buildDir || ".";
     const targetFolder = SETTINGS.packageDir;
-    const targetName   = SETTINGS.packageName; 
+    const targetName   = SETTINGS.packageName;
 
     const zipIt = () => util.createZip(sourceDir, targetFolder, targetName);
     const tarIt = () => util.createTar(sourceDir, targetFolder, targetName);
 
-    return SETTINGS.isAwsLambda ? zipIt() : tarIt() 
+    return SETTINGS.isAwsLambda ? zipIt() : tarIt();
 }
 
 function packageArtefact() {
@@ -94,11 +93,11 @@ function packageArtefact() {
     const targetDir = SETTINGS.leadDir;
     const targetName = SETTINGS.artefactsFilename;
 
-    return util.createZip(sourceDir, targetDir, targetName); 
+    return util.createZip(sourceDir, targetDir, targetName);
 }
 
 function createDirectories() {
-    util.log("Creating directories ...")
+    util.log("Creating directories ...");
 
     return Q.all([
         util.createDir(SETTINGS.targetDir),
@@ -112,11 +111,11 @@ function copyResources() {
     const possibleActions = [
         [cloudformation, SETTINGS.cloudformation],
         [deployJson, true]
-    ]
+    ];
 
     return Q.all(possibleActions
         .filter((a) => a[1])
-        .map((a) => a[0]()))
+        .map((a) => a[0]()));
 }
 
 function cloudformation() {
@@ -124,14 +123,14 @@ function cloudformation() {
         util.createDir(SETTINGS.leadDir + "/packages/cloudformation"),
         util.copyFile(
             SETTINGS.rootDir + "/" + SETTINGS.cloudformation,
-            SETTINGS.leadDir + '/packages/cloudformation/'
+            SETTINGS.leadDir + "/packages/cloudformation/"
         )
-    ]); 
+    ]);
 }
 
 function deployJson() {
     return util.copyFile(
-        SETTINGS.rootDir + "/deploy.json", 
+        SETTINGS.rootDir + "/deploy.json",
         SETTINGS.leadDir
     );
 }
@@ -160,11 +159,11 @@ function uploadArtefact() {
 }
 
 function determineAction() {
-    const buildAndDeployArtefact = () => { 
+    const buildAndDeployArtefact = () => {
         buildArtefact()
             .then(uploadArtefact)
-            .catch((err) => { throw err; })
-    }
+            .catch((err) => { throw err; });
+    };
 
     (SETTINGS.env !== "dev") ? buildAndDeployArtefact() : buildArtefact();
 }
@@ -174,7 +173,7 @@ module.exports = {
     settings: SETTINGS,
     buildManifest: buildManifest,
     s3Upload: s3Upload
-}
+};
 
 if (require.main === module) {
     determineAction();
