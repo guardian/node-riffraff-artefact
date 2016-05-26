@@ -76,7 +76,7 @@ function createTar(sourceDir, targetFolder, targetName) {
         };
 
         const exclude = "--exclude='" + targetName + ".tgz'";
-        const commandString = ["tar czf", targetLocation, sourceDir, exclude].join(" ");
+        const commandString = ["tar czf", targetLocation, exclude, sourceDir].join(" ");
         log("Running: " + commandString);
         exec(commandString, result);
     });
