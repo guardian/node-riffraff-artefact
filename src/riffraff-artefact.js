@@ -142,7 +142,7 @@ function buildManifest() {
         revision: SETTINGS.vcsRevision,
         startTime: SETTINGS.buildStartTime,
         buildNumber: SETTINGS.buildId,
-        projectName: SETTINGS.packageName
+        projectName: SETTINGS.manifestProjectName || SETTINGS.packageName
     };
 }
 

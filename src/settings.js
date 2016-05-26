@@ -18,11 +18,13 @@ log("Reading configuration from " + ROOT + "/package.json");
 
 const packageJson = require(ROOT + "/package.json");
 const cf = packageJson.cloudformation;
+const projectName = packageJson.projectName;
 
 let SETTINGS = {
     rootDir: ROOT,
     artefactsFilename: "artifacts.zip",
     packageName: packageJson.name,
+    manifestProjectName: projectName || packageJson.name,
     cloudformation: (cf == undefined) ? "cloudformation.json" : cf,
     buildStartTime: getDate(),
     projectBranchName: getBranchName() || "Unknown",
