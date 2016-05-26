@@ -31,7 +31,7 @@ function s3Upload() {
     const file = SETTINGS.leadDir + "/" + SETTINGS.artefactsFilename;
 
     // build the path
-    const rootPath = [SETTINGS.packageName, SETTINGS.buildId].join("/");
+    const rootPath = [SETTINGS.manifestProjectName, SETTINGS.buildId].join("/");
 
     var artefact = Q.promise((resolve) => {
         const artefactPath = rootPath + "/" + SETTINGS.artefactsFilename;
