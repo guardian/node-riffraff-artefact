@@ -2,8 +2,8 @@
 
 Plugin for building deployable RiffRaff artefacts in Node. Supports RiffRaff deployment types:
 
-- `cloud-formation` 
-- `aws-lambda` 
+- `cloud-formation`
+- `aws-lambda`
 - `autoscaling`
 
 ## Getting Started
@@ -14,6 +14,7 @@ To use it, ensure you have a `package.json` located in the root directory of you
 ### Options
 - `isAwsLambda`: `true` or `false` (optional - defaults to `false`)
 - `cloudformation`: `false` or the location of your cloudformation (optional - defaults to `cloudformation.json`)
+- `projectName`: a string with the name you want to appear in RiffRaff dropdown (e.g. `team::project` - defaults to `name` in package.json)
 
 Some example `package.json`:
 
@@ -22,7 +23,7 @@ Some example `package.json`:
 {
   "name": "s3watcher",
   "...": "...",
-  "cloudformation": "my_clouformation.json" 
+  "cloudformation": "my_clouformation.json"
 }
 ```
 
@@ -49,7 +50,7 @@ By default, this plugin will build the tgz file from the default directory (the 
 
 ### Build environment support
 Works on:
-- [Circle CI](https://circleci.com/) 
+- [Circle CI](https://circleci.com/)
 - [Travis](https://travis-ci.org/)
 - [Jenkins](https://jenkins-ci.org/) with the [Git plugin](https://wiki.jenkins-ci.org/display/JENKINS/Git+Plugin)
 
