@@ -2,6 +2,7 @@ const AWS = require("aws-sdk");
 const exec = require("child_process").exec;
 const fs = require("fs");
 const Q = require("q");
+const path = require("path");
 const util = require("./lib/util");
 
 const SETTINGS = require("./settings").SETTINGS;
@@ -27,54 +28,72 @@ function clean() {
 
 
 function s3Upload() {
-    const s3 = new AWS.S3();
-    const file = SETTINGS.leadDir + "/" + SETTINGS.artefactsFilename;
+    return uploadZipArtifact().then(uploadManifest);
+}
 
-    // build the path
+function s3FilesUpload() {
+    return uploadIndividualFiles().then(uploadManifest);
+}
+
+function uploadZipArtifact () {
+    const file = SETTINGS.leadDir + "/" + SETTINGS.artefactsFilename;
+    const rootPath = [SETTINGS.manifestProjectName, SETTINGS.buildId].join("/");
+    const artefactPath = rootPath + "/" + SETTINGS.artefactsFilename;
+
+    const stream = fs.createReadStream(file);
+    return upload(
+        SETTINGS.artefactBucket,
+        artefactPath,
+        stream
+    ).then(() => {
+        util.log(`Uploaded riffraff artefact to ${artefactPath} in ${SETTINGS.artefactBucket}`);
+    });
+}
+
+function uploadIndividualFiles () {
     const rootPath = [SETTINGS.manifestProjectName, SETTINGS.buildId].join("/");
 
-    var artefact = Q.promise((resolve) => {
-        const artefactPath = rootPath + "/" + SETTINGS.artefactsFilename;
-        util.log("Uploading to " + artefactPath);
-
-        const stream = fs.createReadStream(file);
-        const params = {
-            Bucket: SETTINGS.artefactBucket,
-            Key: artefactPath,
-            Body: stream,
-            ACL: "bucket-owner-full-control"
-        };
-        s3.upload(params, (err) => {
-            if (err) {
-                throw new Error(err);
-            }
-            console.log(["Uploaded riffraff artefact to", artefactPath, "in",
-                         SETTINGS.artefactBucket].join(" "));
-            resolve();
-        });
+    return util.listFiles(SETTINGS.leadDir).reduce((promise, filename) => {
+        return promise.then(() => upload(
+            SETTINGS.artefactBucket,
+            rootPath + "/" + filename,
+            fs.createReadStream(path.join(SETTINGS.leadDir, filename))
+        ));
+    }, Q.resolve()).then(() => {
+        util.log(`Uploaded riffraff packages to ${rootPath} in ${SETTINGS.artefactBucket}`);
     });
+}
 
-    // upload the manifest after the artefact completes
-    var manifest = artefact.then(() => Q.promise((resolve) => {
-        const manifestPath = rootPath + "/" + SETTINGS.manifestFile;
-        util.log("Uploading to " + manifestPath);
+function uploadManifest () {
+    const rootPath = [SETTINGS.manifestProjectName, SETTINGS.buildId].join("/");
+    const manifestPath = rootPath + "/" + SETTINGS.manifestFile;
 
+    return upload(
+        SETTINGS.manifestBucket,
+        manifestPath,
+        JSON.stringify(buildManifest())
+    ).then(() => {
+        util.log(`Uploaded riffraff manifest to ${manifestPath} in ${SETTINGS.manifestBucket}`);
+    });
+}
+
+function upload (bucket, key, body) {
+    const s3 = new AWS.S3();
+    return Q.promise((resolve, reject) => {
+        util.log("Uploading to " + key);
         s3.upload({
-            Bucket: SETTINGS.manifestBucket,
-            Key: manifestPath,
-            Body: JSON.stringify(buildManifest()),
+            Bucket: bucket,
+            Key: key,
+            Body: body,
             ACL: "bucket-owner-full-control"
         }, (err) => {
             if (err) {
-                throw err;
+                reject(err);
+            } else {
+                resolve();
             }
-            console.log(["Uploaded riffraff manifest to", manifestPath, "in",
-                         SETTINGS.manifestBucket].join(" "));
-            resolve();
         });
-    }));
-
-    return Q.all([manifest, artefact]);
+    });
 }
 
 function compressResource() {
@@ -172,7 +191,8 @@ module.exports = {
     determineAction: determineAction,
     settings: SETTINGS,
     buildManifest: buildManifest,
-    s3Upload: s3Upload
+    s3Upload: s3Upload,
+    s3FilesUpload: s3FilesUpload
 };
 
 if (require.main === module) {

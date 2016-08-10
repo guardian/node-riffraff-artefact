@@ -1,6 +1,7 @@
 const exec = require("child_process").exec;
 const fs = require("fs");
 const Q = require("q");
+const glob = require("glob");
 
 const SETTINGS = require("../settings").SETTINGS;
 
@@ -82,11 +83,20 @@ function createTar(sourceDir, targetFolder, targetName) {
     });
 }
 
+function listFiles(sourceDir) {
+    return glob.sync("**/*", {
+        cwd: sourceDir,
+        nosort: true,
+        nodir: true
+    });
+}
+
 
 module.exports = {
     log,
     createDir,
     createZip,
     createTar,
-    copyFile
+    copyFile,
+    listFiles
 };
