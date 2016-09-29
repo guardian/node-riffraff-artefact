@@ -56,6 +56,8 @@ function determineEnvironment() {
         return "travis-ci";
     } else if (process.env.JENKINS_URL) {
         return "jenkins";
+    } else if (process.env.TEAMCITY_VERSION) {
+        return "teamcity";
     } else {
         return "dev";
     }
@@ -71,6 +73,9 @@ function getBranchName() {
 
         case "jenkins":
         return process.env.GIT_BRANCH;
+
+        case "teamcity":
+        return process.env.TEAMCITY_BRANCH.split("/").slice(-1)[0];
 
         default:
         return "dev";
@@ -88,6 +93,9 @@ function getVcsRevision() {
         case "jenkins":
         return process.env.GIT_COMMIT;
 
+        case "teamcity":
+        return process.env.BUILD_VCS_NUMBER;
+
         default:
         return "dev";
     }
@@ -102,6 +110,9 @@ function getBuildId() {
         return process.env.TRAVIS_BUILD_NUMBER;
 
         case "jenkins":
+        return process.env.BUILD_NUMBER;
+
+        case "teamcity":
         return process.env.BUILD_NUMBER;
 
         default:

@@ -53,6 +53,7 @@ Works on:
 - [Circle CI](https://circleci.com/)
 - [Travis](https://travis-ci.org/)
 - [Jenkins](https://jenkins-ci.org/) with the [Git plugin](https://wiki.jenkins-ci.org/display/JENKINS/Git+Plugin)
+- Teamcity. Note - you need to manually pass the branch name as an environment variable. Under Parameters, create an environment variable called `TEAMCITY_BRANCH` with the value `teamcity.build.vcs.branch.<your build configuration ID>`
 
 If you want to support other continuous integration tools, have a look at `settings.js` and configure the relevant environment variables to get information about the build.
 
