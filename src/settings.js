@@ -19,6 +19,7 @@ log("Reading configuration from " + ROOT + "/package.json");
 const packageJson = require(ROOT + "/package.json");
 const cf = packageJson.cloudformation;
 const projectName = packageJson.projectName;
+const riffraffFile = packageJson.riffraffFile || "/deploy.json";
 
 let SETTINGS = {
     rootDir: ROOT,
@@ -40,7 +41,8 @@ let SETTINGS = {
     packageDir: ROOT + "/target/riffraff/packages/" + packageJson.name,
     buildDir: packageJson.buildDir || undefined,
     bufferSize: parseInt(process.env.NODE_STDOUT_BUFFER || (1024 * 5000)),
-    env: ENVIRONMENT
+    env: ENVIRONMENT,
+    riffraffFile: riffraffFile
 };
 
 

@@ -1,6 +1,6 @@
 {
   "name": "node-riffraff-artefact",
-  "version": "1.8.1",
+  "version": "1.8.2",
   "description": "Deploy RiffRaff Artefacts",
   "main": "dist/riffraff-artefact.js",
   "bin": {
