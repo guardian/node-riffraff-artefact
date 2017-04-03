@@ -129,7 +129,7 @@ function createDirectories() {
 function copyResources() {
     const possibleActions = [
         [cloudformation, SETTINGS.cloudformation],
-        [deployJson, true]
+        [riffraffFile, true]
     ];
 
     return Q.all(possibleActions
@@ -147,9 +147,9 @@ function cloudformation() {
     ]);
 }
 
-function deployJson() {
+function riffraffFile() {
     return util.copyFile(
-        SETTINGS.rootDir + "/deploy.json",
+        SETTINGS.rootDir + "/" + SETTINGS.riffraffFile,
         SETTINGS.leadDir
     );
 }
