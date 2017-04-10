@@ -15,6 +15,7 @@ To use it, ensure you have a `package.json` located in the root directory of you
 - `isAwsLambda`: `true` or `false` (optional - defaults to `false`)
 - `cloudformation`: `false` or the location of your cloudformation (optional - defaults to `cloudformation.json`)
 - `projectName`: a string with the name you want to appear in RiffRaff dropdown (e.g. `team::project` - defaults to `name` in package.json)
+- `riffraffFile`: path to a RiffRaff `deploy.json` or `riff-raff.yaml` for your app. Defaults to `./deploy.json`.
 
 Some example `package.json`:
 
