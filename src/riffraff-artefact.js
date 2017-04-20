@@ -184,7 +184,7 @@ function determineAction() {
             .catch((err) => { throw err; });
     };
 
-    (SETTINGS.env !== "dev") ? buildAndDeployArtefact() : buildArtefact();
+    (SETTINGS.env !== "dev" && SETTINGS.uploadArtefact) ? buildAndDeployArtefact() : buildArtefact();
 }
 
 module.exports = {

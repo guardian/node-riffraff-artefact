@@ -21,6 +21,8 @@ const cf = packageJson.cloudformation;
 const projectName = packageJson.projectName;
 const riffraffFile = packageJson.riffraffFile || "/deploy.json";
 
+const uploadArtefact = packageJson.uploadArtefact || true;
+
 let SETTINGS = {
     rootDir: ROOT,
     artefactsFilename: "artifacts.zip",
@@ -42,7 +44,8 @@ let SETTINGS = {
     buildDir: packageJson.buildDir || undefined,
     bufferSize: parseInt(process.env.NODE_STDOUT_BUFFER || (1024 * 5000)),
     env: ENVIRONMENT,
-    riffraffFile: riffraffFile
+    riffraffFile: riffraffFile,
+    uploadArtefact: uploadArtefact
 };
 
 
