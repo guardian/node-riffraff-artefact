@@ -21,7 +21,7 @@ const cf = packageJson.cloudformation;
 const projectName = packageJson.projectName;
 const riffraffFile = packageJson.riffraffFile || "/deploy.json";
 
-const uploadArtefact = packageJson.uploadArtefact || true;
+const uploadArtefact = packageJson.uploadArtefact === undefined ? true : packageJson.uploadArtefact;
 
 let SETTINGS = {
     rootDir: ROOT,
