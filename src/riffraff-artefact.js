@@ -27,27 +27,8 @@ function clean() {
 }
 
 
-function s3Upload() {
-    return uploadZipArtifact().then(uploadManifest);
-}
-
 function s3FilesUpload() {
     return uploadIndividualFiles().then(uploadManifest);
-}
-
-function uploadZipArtifact () {
-    const file = SETTINGS.leadDir + "/" + SETTINGS.artefactsFilename;
-    const rootPath = [SETTINGS.manifestProjectName, SETTINGS.buildId].join("/");
-    const artefactPath = rootPath + "/" + SETTINGS.artefactsFilename;
-
-    const stream = fs.createReadStream(file);
-    return upload(
-        SETTINGS.artefactBucket,
-        artefactPath,
-        stream
-    ).then(() => {
-        util.log(`Uploaded riffraff artefact to ${artefactPath} in ${SETTINGS.artefactBucket}`);
-    });
 }
 
 function uploadIndividualFiles () {
@@ -107,21 +88,12 @@ function compressResource() {
     return SETTINGS.isAwsLambda ? zipIt() : tarIt();
 }
 
-function packageArtefact() {
-    const sourceDir = SETTINGS.leadDir;
-    const targetDir = SETTINGS.leadDir;
-    const targetName = SETTINGS.artefactsFilename;
-
-    return util.createZip(sourceDir, targetDir, targetName);
-}
 
 function createDirectories() {
     util.log("Creating directories ...");
-
     return Q.all([
         util.createDir(SETTINGS.targetDir),
         util.createDir(SETTINGS.leadDir),
-        util.createDir(SETTINGS.leadDir + "/packages"),
         util.createDir(SETTINGS.packageDir)
     ]);
 }
@@ -169,12 +141,11 @@ function buildArtefact() {
     return clean()
         .then(createDirectories)
         .then(copyResources)
-        .then(compressResource)
-        .then(packageArtefact);
+        .then(compressResource);
 }
 
 function uploadArtefact() {
-    return s3Upload();
+    return s3FilesUpload();
 }
 
 function determineAction() {
@@ -191,7 +162,6 @@ module.exports = {
     determineAction: determineAction,
     settings: SETTINGS,
     buildManifest: buildManifest,
-    s3Upload: s3Upload,
     s3FilesUpload: s3FilesUpload
 };
 

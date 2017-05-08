@@ -19,13 +19,12 @@ log("Reading configuration from " + ROOT + "/package.json");
 const packageJson = require(ROOT + "/package.json");
 const cf = packageJson.cloudformation;
 const projectName = packageJson.projectName;
-const riffraffFile = packageJson.riffraffFile || "/deploy.json";
+const riffraffFile = packageJson.riffraffFile || "/riff-raff.yaml";
 
 const uploadArtefact = packageJson.uploadArtefact === undefined ? true : packageJson.uploadArtefact;
 
 let SETTINGS = {
     rootDir: ROOT,
-    artefactsFilename: "artifacts.zip",
     packageName: packageJson.name,
     manifestProjectName: projectName || packageJson.name,
     cloudformation: (cf == undefined) ? "cloudformation.json" : cf,
@@ -40,7 +39,7 @@ let SETTINGS = {
     manifestBucket: "riffraff-builds",
     targetDir: ROOT + "/target",
     leadDir: ROOT + "/target/riffraff",
-    packageDir: ROOT + "/target/riffraff/packages/" + packageJson.name,
+    packageDir: ROOT + "/target/riffraff/" + packageJson.name,
     buildDir: packageJson.buildDir || undefined,
     bufferSize: parseInt(process.env.NODE_STDOUT_BUFFER || (1024 * 5000)),
     env: ENVIRONMENT,
