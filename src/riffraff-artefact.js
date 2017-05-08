@@ -82,10 +82,7 @@ function compressResource() {
     const targetFolder = SETTINGS.packageDir;
     const targetName   = SETTINGS.packageName;
 
-    const zipIt = () => util.createZip(sourceDir, targetFolder, targetName);
-    const tarIt = () => util.createTar(sourceDir, targetFolder, targetName);
-
-    return SETTINGS.isAwsLambda ? zipIt() : tarIt();
+    return util.createZip(sourceDir, targetFolder, targetName);
 }
 
 
