@@ -6,6 +6,7 @@ var fs = require("fs");
 var Q = require("q");
 var path = require("path");
 var util = require("./lib/util");
+var yaml = require("js-yaml");
 
 var SETTINGS = require("./settings").SETTINGS;
 
@@ -77,7 +78,14 @@ function compressResource() {
     var targetFolder = SETTINGS.packageDir;
     var targetName = SETTINGS.packageName;
 
-    return util.createZip(sourceDir, targetFolder, targetName);
+    var zipIt = function zipIt() {
+        return util.createZip(sourceDir, targetFolder, targetName);
+    };
+    var tarIt = function tarIt() {
+        return util.createTar(sourceDir, targetFolder, targetName);
+    };
+
+    return SETTINGS.isAwsLambda ? zipIt() : tarIt();
 }
 
 function createDirectories() {
@@ -96,7 +104,7 @@ function copyResources() {
 }
 
 function cloudformation() {
-    return Q.all([util.createDir(SETTINGS.leadDir + "/packages/cloudformation"), util.copyFile(SETTINGS.rootDir + "/" + SETTINGS.cloudformation, SETTINGS.leadDir + "/packages/cloudformation/")]);
+    return Q.all([util.createDir(SETTINGS.leadDir + "/cloudformation"), util.copyFile(SETTINGS.rootDir + "/" + SETTINGS.cloudformation, SETTINGS.leadDir + "/cloudformation/")]);
 }
 
 function riffraffFile() {
@@ -123,6 +131,10 @@ function uploadArtefact() {
 }
 
 function determineAction() {
+    if (!validateYaml()) {
+        return;
+    }
+
     var buildAndDeployArtefact = function buildAndDeployArtefact() {
         buildArtefact().then(uploadArtefact).catch(function (err) {
             throw err;
@@ -132,11 +144,24 @@ function determineAction() {
     SETTINGS.env !== "dev" && SETTINGS.uploadArtefact ? buildAndDeployArtefact() : buildArtefact();
 }
 
+function validateYaml() {
+    var file = SETTINGS.riffraffFile;
+    try {
+        yaml.load(fs.readFileSync(file, "utf8"));
+        util.log(file + " successfully parsed");
+        return true;
+    } catch (e) {
+        console.error(e, file + " was not successfully parsed.");
+    }
+    return false;
+}
+
 module.exports = {
     determineAction: determineAction,
     settings: SETTINGS,
     buildManifest: buildManifest,
-    s3FilesUpload: s3FilesUpload
+    s3FilesUpload: s3FilesUpload,
+    validateYaml: validateYaml
 };
 
 if (require.main === module) {

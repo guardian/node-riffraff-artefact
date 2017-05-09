@@ -65,6 +65,26 @@ function createZip(sourceDir, targetFolder, targetName) {
     });
 }
 
+function createTar(sourceDir, targetFolder, targetName) {
+    var targetLocation = [targetFolder, "/", targetName.replace(".tgz", ""), ".tgz"].join("");
+
+    return Q.promise(function (resolve) {
+        var result = function result(error) {
+            if (error) {
+                console.error("Failed to create tar with: " + error.stack);
+                process.exit(1);
+            }
+            log("Created tgz file in: ", targetLocation);
+            return resolve(targetLocation);
+        };
+
+        var exclude = "--exclude='" + targetName + ".tgz'";
+        var commandString = ["tar czf", targetLocation, exclude, sourceDir].join(" ");
+        log("Running: " + commandString);
+        exec(commandString, result);
+    });
+}
+
 function listFiles(sourceDir) {
     return glob.sync("**/*", {
         cwd: sourceDir,
@@ -77,6 +97,7 @@ module.exports = {
     log: log,
     createDir: createDir,
     createZip: createZip,
+    createTar: createTar,
     copyFile: copyFile,
     listFiles: listFiles
 };

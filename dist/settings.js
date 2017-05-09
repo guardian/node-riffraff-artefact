@@ -32,6 +32,7 @@ var SETTINGS = {
     buildStartTime: getDate(),
     projectBranchName: getBranchName() || "Unknown",
     manifestFile: "build.json",
+    isAwsLambda: packageJson.isAwsLambda || false,
     vcsURL: packageJson.repository || "Unknown",
     vcsRevision: getVcsRevision() || "Unknown",
     buildId: getBuildId() || "DEV",
