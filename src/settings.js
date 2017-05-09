@@ -18,6 +18,7 @@ log("Reading configuration from " + ROOT + "/package.json");
 
 const packageJson = require(ROOT + "/package.json");
 const cf = packageJson.cloudformation;
+const cloudformationAppName = packageJson.cloudformationAppName;
 const projectName = packageJson.projectName;
 const riffraffFile = packageJson.riffraffFile || "/riff-raff.yaml";
 
@@ -28,6 +29,7 @@ let SETTINGS = {
     packageName: packageJson.name,
     manifestProjectName: projectName || packageJson.name,
     cloudformation: (cf == undefined) ? "cloudformation.json" : cf,
+    cloudformationAppName: (cloudformationAppName == undefined) ? packageJson.name + "-cloudformation" : cloudformationAppName,
     buildStartTime: getDate(),
     projectBranchName: getBranchName() || "Unknown",
     manifestFile: "build.json",
