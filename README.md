@@ -15,7 +15,7 @@ To use it, ensure you have a `package.json` located in the root directory of you
 - `isAwsLambda`: `true` or `false` (optional - defaults to `false`)
 - `cloudformation`: `false` or the location of your cloudformation (optional - defaults to `cloudformation.json`)
 - `projectName`: a string with the name you want to appear in RiffRaff dropdown (e.g. `team::project` - defaults to `name` in package.json)
-- `cloudformationAppName`: a string with the value of the App tag for the cloudformation stack (e.g. `name-cloudformation` - defaults to `name` in package.json with `-cloudformation` appended)
+- `cloudformationAppTag`: a string with the value of the App tag for the cloudformation stack and the name of the cloudformation deployment in `riff-raff.yaml` (e.g. `name-cloudformation` - defaults to `name` in package.json with `-cloudformation` appended)
 - `riffraffFile`: path to a RiffRaff `riff-raff.yaml` for your app. Defaults to `./riff-raff.yaml`.
 - `uploadArtefact`: `true` or `false` (optional - defaults to `true`). Determines if the artefact should be uploaded to S3.
 
@@ -31,7 +31,7 @@ deployments:
       ...
       functionNames:
       - name-from-package-json-
-  cloudformationAppName-from-package-json:
+  cloudformationAppTag-from-package-json:
     type: cloud-formation
     parameters:
       templatePath: 'cloudformation/cloudformation.yaml'
@@ -46,7 +46,7 @@ Some example `package.json`:
   "name": "s3watcher",
   "...": "...",
   "cloudformation": "my_cloudformation.json",
-  "cloudformationAppName": "s3watcher-cloudformation"
+  "cloudformationAppTag": "s3watcher-cloudformation"
 }
 ```
 
