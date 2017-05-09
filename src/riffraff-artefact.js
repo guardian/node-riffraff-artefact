@@ -4,6 +4,7 @@ const fs = require("fs");
 const Q = require("q");
 const path = require("path");
 const util = require("./lib/util");
+const yaml = require("js-yaml");
 
 const SETTINGS = require("./settings").SETTINGS;
 
@@ -27,27 +28,8 @@ function clean() {
 }
 
 
-function s3Upload() {
-    return uploadZipArtifact().then(uploadManifest);
-}
-
 function s3FilesUpload() {
     return uploadIndividualFiles().then(uploadManifest);
-}
-
-function uploadZipArtifact () {
-    const file = SETTINGS.leadDir + "/" + SETTINGS.artefactsFilename;
-    const rootPath = [SETTINGS.manifestProjectName, SETTINGS.buildId].join("/");
-    const artefactPath = rootPath + "/" + SETTINGS.artefactsFilename;
-
-    const stream = fs.createReadStream(file);
-    return upload(
-        SETTINGS.artefactBucket,
-        artefactPath,
-        stream
-    ).then(() => {
-        util.log(`Uploaded riffraff artefact to ${artefactPath} in ${SETTINGS.artefactBucket}`);
-    });
 }
 
 function uploadIndividualFiles () {
@@ -107,21 +89,12 @@ function compressResource() {
     return SETTINGS.isAwsLambda ? zipIt() : tarIt();
 }
 
-function packageArtefact() {
-    const sourceDir = SETTINGS.leadDir;
-    const targetDir = SETTINGS.leadDir;
-    const targetName = SETTINGS.artefactsFilename;
-
-    return util.createZip(sourceDir, targetDir, targetName);
-}
 
 function createDirectories() {
     util.log("Creating directories ...");
-
     return Q.all([
         util.createDir(SETTINGS.targetDir),
         util.createDir(SETTINGS.leadDir),
-        util.createDir(SETTINGS.leadDir + "/packages"),
         util.createDir(SETTINGS.packageDir)
     ]);
 }
@@ -139,10 +112,11 @@ function copyResources() {
 
 function cloudformation() {
     return Q.all([
-        util.createDir(SETTINGS.leadDir + "/packages/cloudformation"),
+        util.createDir(SETTINGS.leadDir + "/" + SETTINGS.cloudformationAppTag),
+        util.createDir(SETTINGS.leadDir + "/" + SETTINGS.cloudformationAppTag + "/cloudformation"),
         util.copyFile(
             SETTINGS.rootDir + "/" + SETTINGS.cloudformation,
-            SETTINGS.leadDir + "/packages/cloudformation/"
+            SETTINGS.leadDir + "/" + SETTINGS.cloudformationAppTag + "/cloudformation"
         )
     ]);
 }
@@ -169,15 +143,18 @@ function buildArtefact() {
     return clean()
         .then(createDirectories)
         .then(copyResources)
-        .then(compressResource)
-        .then(packageArtefact);
+        .then(compressResource);
 }
 
 function uploadArtefact() {
-    return s3Upload();
+    return s3FilesUpload();
 }
 
 function determineAction() {
+    if (!isValidYaml()){
+        return;
+    }
+
     const buildAndDeployArtefact = () => {
         buildArtefact()
             .then(uploadArtefact)
@@ -187,12 +164,24 @@ function determineAction() {
     (SETTINGS.env !== "dev" && SETTINGS.uploadArtefact) ? buildAndDeployArtefact() : buildArtefact();
 }
 
+function isValidYaml(){
+    const file = SETTINGS.riffraffFile;
+    try {
+        yaml.load(fs.readFileSync(file,"utf8"));
+        util.log(file + " successfully parsed");
+        return true;
+    } catch (e) {
+        console.error(e,file + " was not successfully parsed.");
+    }
+    return false;
+}
+
 module.exports = {
     determineAction: determineAction,
     settings: SETTINGS,
     buildManifest: buildManifest,
-    s3Upload: s3Upload,
-    s3FilesUpload: s3FilesUpload
+    s3FilesUpload: s3FilesUpload,
+    isValidYaml: isValidYaml
 };
 
 if (require.main === module) {
