@@ -151,7 +151,7 @@ function uploadArtefact() {
 }
 
 function determineAction() {
-    if (!validateYaml()){
+    if (!isValidYaml()){
         return;
     }
 
@@ -164,7 +164,7 @@ function determineAction() {
     (SETTINGS.env !== "dev" && SETTINGS.uploadArtefact) ? buildAndDeployArtefact() : buildArtefact();
 }
 
-function validateYaml(){
+function isValidYaml(){
     const file = SETTINGS.riffraffFile;
     try {
         yaml.load(fs.readFileSync(file,"utf8"));
@@ -181,7 +181,7 @@ module.exports = {
     settings: SETTINGS,
     buildManifest: buildManifest,
     s3FilesUpload: s3FilesUpload,
-    validateYaml: validateYaml
+    isValidYaml: isValidYaml
 };
 
 if (require.main === module) {
