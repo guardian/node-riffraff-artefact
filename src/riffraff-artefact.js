@@ -112,11 +112,11 @@ function copyResources() {
 
 function cloudformation() {
     return Q.all([
-        util.createDir(SETTINGS.leadDir + SETTINGS.cloudformationAppName),
-        util.createDir(SETTINGS.leadDir + SETTINGS.cloudformationAppName + "/cloudformation"),
+        util.createDir(SETTINGS.leadDir + "/" + SETTINGS.cloudformationAppName),
+        util.createDir(SETTINGS.leadDir + "/" + SETTINGS.cloudformationAppName + "/cloudformation"),
         util.copyFile(
             SETTINGS.rootDir + "/" + SETTINGS.cloudformation,
-            SETTINGS.leadDir + SETTINGS.cloudformationAppName + "/cloudformation"
+            SETTINGS.leadDir + "/" + SETTINGS.cloudformationAppName + "/cloudformation"
         )
     ]);
 }
