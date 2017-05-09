@@ -4,6 +4,7 @@ const fs = require("fs");
 const Q = require("q");
 const path = require("path");
 const util = require("./lib/util");
+const yaml = require("js-yaml");
 
 const SETTINGS = require("./settings").SETTINGS;
 
@@ -82,7 +83,10 @@ function compressResource() {
     const targetFolder = SETTINGS.packageDir;
     const targetName   = SETTINGS.packageName;
 
-    return util.createZip(sourceDir, targetFolder, targetName);
+    const zipIt = () => util.createZip(sourceDir, targetFolder, targetName);
+    const tarIt = () => util.createTar(sourceDir, targetFolder, targetName);
+
+    return SETTINGS.isAwsLambda ? zipIt() : tarIt();
 }
 
 
@@ -108,10 +112,10 @@ function copyResources() {
 
 function cloudformation() {
     return Q.all([
-        util.createDir(SETTINGS.leadDir + "/packages/cloudformation"),
+        util.createDir(SETTINGS.leadDir + "/cloudformation"),
         util.copyFile(
             SETTINGS.rootDir + "/" + SETTINGS.cloudformation,
-            SETTINGS.leadDir + "/packages/cloudformation/"
+            SETTINGS.leadDir + "/cloudformation/"
         )
     ]);
 }
@@ -146,6 +150,10 @@ function uploadArtefact() {
 }
 
 function determineAction() {
+    if (!validateYaml()){
+        return;
+    }
+
     const buildAndDeployArtefact = () => {
         buildArtefact()
             .then(uploadArtefact)
@@ -155,11 +163,24 @@ function determineAction() {
     (SETTINGS.env !== "dev" && SETTINGS.uploadArtefact) ? buildAndDeployArtefact() : buildArtefact();
 }
 
+function validateYaml(){
+    const file = SETTINGS.riffraffFile;
+    try {
+        yaml.load(fs.readFileSync(file,"utf8"));
+        util.log(file + " successfully parsed");
+        return true;
+    } catch (e) {
+        console.error(e,file + " was not successfully parsed.");
+    }
+    return false;
+}
+
 module.exports = {
     determineAction: determineAction,
     settings: SETTINGS,
     buildManifest: buildManifest,
-    s3FilesUpload: s3FilesUpload
+    s3FilesUpload: s3FilesUpload,
+    validateYaml: validateYaml
 };
 
 if (require.main === module) {

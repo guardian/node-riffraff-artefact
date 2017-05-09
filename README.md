@@ -34,6 +34,7 @@ Some example `package.json`:
 {
   "name": "s3watcher",
   "...": "...",
+  "isAwsLambda": true,
   "cloudformation": false
 }
 ```
@@ -47,7 +48,7 @@ You may then wish to add build hooks into whatever continuous deployment you're 
 You can enable more verbose logging setting the environment variable `VERBOSE=true`.
 
 ### Configuring the Default build directory
-By default, this plugin will build the zip file from the default directory (the root). You can configure this by setting `buildDir` to whatever you want in the package.json file. Note that this is the root directory that node will be run on. So a `package.json` with relevant run scripts must be present.
+By default, this plugin will build the tgz file from the default directory (the root). You can configure this by setting `buildDir` to whatever you want in the package.json file. Note that this is the root directory that node will be run on. So a `package.json` with relevant run scripts must be present.
 
 ### Build environment support
 Works on:
