@@ -11,7 +11,13 @@ This is a node plugin for creating [RiffRaff](https://github.com/guardian/deploy
 
 To use it, ensure you have a `package.json` located in the root directory of your project. There must be at the very minimum the `name` field.
 
-### Options
+In your project root directory, type:
+
+```
+npm install node-riffraff-artefact --save
+```
+
+### Options - these sit at the root level of your package.json
 - `isAwsLambda`: `true` or `false` (optional - defaults to `false`)
 - `cloudformation`: `false` or the location of your cloudformation (optional - defaults to `cloudformation.json`)
 - `projectName`: a string with the name you want to appear in RiffRaff dropdown (e.g. `team::project` - defaults to `name` in package.json)
