@@ -15,9 +15,9 @@ log("Root project path set as " + ROOT);
  * To be valid packageJson,json must at the very least have
  * a name and a cloudformation field.
  */
-log("Reading configuration from " + ROOT + "/package.json");
+log("Reading configuration from " + ROOT + "/" + pkg);
 
-const packageJson = require(ROOT + "/package.json");
+const packageJson = require(ROOT + "/" + pkg);
 const cf = packageJson.cloudformation;
 const cloudformationAppTag = packageJson.cloudformationAppTag;
 const projectName = packageJson.projectName;
