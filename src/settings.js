@@ -6,6 +6,7 @@ const ENVIRONMENT = determineEnvironment();
 
 const log = (process.env.VERBOSE === "true") ? console.log.bind(console) : function () {};
 
+const pkg = !process.env.CONFIG ? "package.json" : process.env.CONFIG;
 
 log("Determined running in: " + ENVIRONMENT);
 log("Root project path set as " + ROOT);
