@@ -1,6 +1,6 @@
 {
-  "name": "@guardian/node-riffraff-artefact",
-  "version": "2.0.2",
+  "name": "node-riffraff-artefact",
+  "version": "2.0.1",
   "description": "Deploy RiffRaff Artefacts",
   "main": "dist/riffraff-artefact.js",
   "bin": {
